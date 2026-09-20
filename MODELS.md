@@ -68,11 +68,21 @@ released when the app goes to the background.
 the phone never does):
 
 ```
-pip install huggingface_hub pyyaml
-pip install paddlepaddle paddlex && paddlex --install paddle2onnx      # OCR conversion
+python -m pip install huggingface_hub pyyaml
+python -m pip install paddlepaddle paddlex          # OCR conversion ...
+python -m paddlex --install paddle2onnx             # ... and PaddleX's Paddle -> ONNX plugin
 
-python tools/export_models.py --ocr main latin eslav --nllb prebuilt
+python tools/export_models.py --ocr main eslav --nllb prebuilt
 ```
+
+Use `python -m pip`, not a bare `pip`: the packages must land in the same interpreter that runs the
+script (with several Pythons / conda environments on one PC, a bare `pip` often installs into a
+different one, and the script then fails with `No module named paddlex`). The script checks its
+requirements before downloading anything and prints the exact commands for whatever is missing.
+
+On Windows, if the conversion step itself fails with the stable PaddlePaddle build, PaddleX's
+documentation says to use the nightly CPU build:
+`python -m pip install --pre paddlepaddle -i https://www.paddlepaddle.org.cn/packages/nightly/cpu/`
 
 `--nllb prebuilt` downloads the ready-made int8 ONNX export (`Xenova/nllb-200-distilled-600M`).
 The OCR models are converted from the official Paddle inference models (`PaddlePaddle/*` on the

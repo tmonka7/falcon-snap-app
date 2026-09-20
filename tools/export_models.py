@@ -17,19 +17,26 @@ Typical use:
     # after retraining: point at your own checkpoints instead
     python tools/export_models.py --ocr-rec main=./my_rec_infer --nllb ./my-finetuned-nllb
 
-Requirements:
-    pip install huggingface_hub pyyaml
-    OCR conversion:  pip install paddlepaddle paddlex && paddlex --install paddle2onnx
-    NLLB export:     pip install "optimum[onnxruntime]" onnxruntime   (not needed for --nllb prebuilt)
+Requirements (install them into the SAME Python that runs this script: "python -m pip ..."):
+    python -m pip install huggingface_hub pyyaml
+    OCR conversion:  python -m pip install paddlepaddle paddlex
+                     python -m paddlex --install paddle2onnx
+    NLLB export:     python -m pip install "optimum[onnxruntime]" onnxruntime   (not needed for --nllb prebuilt)
+The script checks for these up front and tells you what is missing.
 """
 import argparse
+import importlib.util
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-import yaml
-from huggingface_hub import hf_hub_download, snapshot_download
+try:
+    import yaml
+    from huggingface_hub import hf_hub_download, snapshot_download
+except ImportError as e:
+    sys.exit(f'Missing Python package "{e.name}". Install it into this interpreter:\n'
+             f'    "{sys.executable}" -m pip install huggingface_hub pyyaml')
 
 # App recognizer key -> official PP-OCRv5 recognition model (https://huggingface.co/PaddlePaddle).
 # The keys are the ones in app/src/main/java/com/falcon/snap/model/Language.java.
@@ -57,11 +64,38 @@ def run(*command):
     subprocess.run([str(c) for c in command], check=True)
 
 
+def require(modules, purpose, install_steps):
+    """Stops with install instructions if a needed package is missing, before anything is downloaded."""
+    missing = [m for m in modules if importlib.util.find_spec(m) is None]
+    if not missing:
+        return
+    python = f'"{sys.executable}"'
+    lines = [f"\nCannot do the {purpose}: missing Python package(s): {', '.join(missing)}",
+             f"This script is running under {sys.executable}; install into that interpreter:\n"]
+    # Steps that start with "-m" are commands for this interpreter; anything else is a note.
+    lines += [f"    {python} {step}" if step.startswith("-m") else f"    {step}" for step in install_steps]
+    sys.exit("\n".join(lines) + "\n")
+
+
+def check_requirements(args):
+    if args.ocr or args.ocr_rec:
+        require(["paddle", "paddlex", "paddle2onnx"], "OCR conversion (Paddle -> ONNX)", [
+            "-m pip install paddlepaddle paddlex",
+            "-m paddlex --install paddle2onnx",
+            "",
+            "# Windows: if the conversion itself then fails, PaddleX's docs say to use the nightly CPU build:",
+            "-m pip install --pre paddlepaddle -i https://www.paddlepaddle.org.cn/packages/nightly/cpu/",
+        ])
+    if args.nllb and args.nllb != "prebuilt":
+        require(["optimum", "onnxruntime"], "NLLB export", ['-m pip install "optimum[onnxruntime]" onnxruntime'])
+
+
 def paddle_to_onnx(model_dir: Path, target: Path, work: Path):
     """model_dir holds a Paddle inference model: inference.json / inference.pdiparams / inference.yml."""
     out_dir = work / (target.stem + "_onnx")
-    run("paddlex", "--paddle2onnx", "--paddle_model_dir", model_dir, "--onnx_model_dir", out_dir,
-        "--opset_version", "7")
+    # "python -m paddlex" rather than the "paddlex" command: same interpreter, and no PATH surprises.
+    run(sys.executable, "-m", "paddlex", "--paddle2onnx", "--paddle_model_dir", model_dir,
+        "--onnx_model_dir", out_dir, "--opset_version", "7")
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(out_dir / "inference.onnx", target)
     print("wrote", target)
@@ -119,8 +153,8 @@ def export_nllb(args, out: Path, work: Path):
 
     # A local fine-tuned checkpoint, or a hub id such as facebook/nllb-200-distilled-600M.
     export_dir = work / "nllb_onnx"
-    run("optimum-cli", "export", "onnx", "--model", args.nllb, "--task", "text2text-generation-with-past",
-        export_dir)
+    run(sys.executable, "-m", "optimum.commands.optimum_cli", "export", "onnx", "--model", args.nllb,
+        "--task", "text2text-generation-with-past", export_dir)
     shutil.copyfile(export_dir / "tokenizer.json", nllb / "tokenizer.json")
     for name in ("encoder_model", "decoder_model_merged"):
         if args.no_quantize:
@@ -143,6 +177,7 @@ def main():
     parser.add_argument("--nllb", help="'prebuilt', a hub id, or the folder of a fine-tuned checkpoint")
     parser.add_argument("--no-quantize", action="store_true", help="keep NLLB in fp32 (about 4x larger)")
     args = parser.parse_args()
+    check_requirements(args)
 
     out = Path(args.out)
     work = out / ".work"
