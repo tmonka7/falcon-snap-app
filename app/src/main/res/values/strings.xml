@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SnapTranslate</string>
+
+    <!-- Splash -->
+    <string name="splash_steps">Capture  ·  OCR  ·  Translate</string>
+    <string name="splash_tagline">Translate text in your world\n— instantly</string>
+
+    <!-- Home / navigation -->
+    <string name="home_capture_title">Tap to Capture</string>
+    <string name="home_capture_sub">Take a photo to translate text</string>
+    <string name="home_gallery_sub">Select image from gallery</string>
+    <string name="home_history_sub">View translation history</string>
+    <string name="home_settings_sub">Language, OCR, etc.</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_history">History</string>
+    <string name="nav_gallery">Gallery</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_help">Help &amp; Support</string>
+    <string name="nav_about">About</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_back">Back</string>
+    <string name="cd_menu">Open menu</string>
+    <string name="cd_flash">Flash mode</string>
+    <string name="cd_shutter">Take photo</string>
+    <string name="cd_swap">Swap languages</string>
+    <string name="cd_speak">Read aloud</string>
+    <string name="cd_clear">Clear text</string>
+    <string name="cd_apply">Apply</string>
+    <string name="cd_delete_all">Delete all history</string>
+    <string name="cd_previous">Previous text</string>
+    <string name="cd_next">Next text</string>
+
+    <!-- Camera -->
+    <string name="camera_flip">Flip</string>
+    <string name="camera_permission_denied">Camera permission is required to capture text. You can still pick an image from the gallery.</string>
+    <string name="camera_unavailable">Could not start the camera.</string>
+    <string name="capture_failed">Capture failed. Please try again.</string>
+
+    <!-- Processing / result -->
+    <string name="processing_loading">Loading image…</string>
+    <string name="processing_extracting">Extracting text…</string>
+    <string name="processing_translating">Translating…</string>
+    <string name="processing_downloading">Downloading language model…\n(first time only)</string>
+    <string name="processing_rendering">Replacing text…</string>
+    <string name="status_completed">Translation completed!</string>
+    <string name="status_no_text">No text found in this image</string>
+    <string name="status_failed">Translation failed. Check your connection — language models are downloaded on first use.</string>
+    <string name="status_load_failed">Could not open this image.</string>
+    <string name="label_original_fmt">%1$s (Original)</string>
+    <string name="label_translated_fmt">%1$s (Translated)</string>
+    <string name="btn_edit">Edit</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_apply">Apply</string>
+    <string name="show_original">Show original</string>
+    <string name="show_translated">Show translated</string>
+    <string name="saved_to_history">Saved to history</string>
+    <string name="saved_to_history_and_gallery">Saved to history and Pictures/SnapTranslate</string>
+    <string name="save_failed">Could not save this translation.</string>
+    <string name="copied">Copied to clipboard</string>
+    <string name="tts_unavailable">Speech is not available for this language.</string>
+
+    <!-- Edit -->
+    <string name="title_edit">Edit Translation</string>
+    <string name="label_original_text">Original Text</string>
+    <string name="label_translated_text">Translated Text</string>
+    <string name="block_counter_fmt">Text %1$d of %2$d</string>
+
+    <!-- Language selection -->
+    <string name="title_select_language">Select Language</string>
+    <string name="subtitle_translate_from">Translate from</string>
+    <string name="subtitle_translate_to">Translate to</string>
+    <string name="search_language_hint">Search language…</string>
+    <string name="recent_languages">Recent Languages</string>
+    <string name="all_languages">All Languages</string>
+    <string name="source_not_supported">%1$s can only be a target language (text recognition is not available for it).</string>
+
+    <!-- History -->
+    <string name="title_history">Translation History</string>
+    <string name="filter_all">All</string>
+    <string name="history_empty">No saved translations yet.\nCapture something and tap Save.</string>
+    <string name="delete_entry_title">Delete this translation?</string>
+    <string name="delete_all_title">Delete all history?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+
+    <!-- Settings -->
+    <string name="title_settings">Settings</string>
+    <string name="setting_ocr_language">OCR Language</string>
+    <string name="setting_target_language">Target Language</string>
+    <string name="setting_auto_replace">Auto Replace Text</string>
+    <string name="setting_save_original">Save Original Image</string>
+
+    <!-- About -->
+    <string name="title_about">About</string>
+    <string name="about_version_fmt">Version %1$s</string>
+    <string name="about_tagline">Capture, extract, translate.\nBreak the language barrier.</string>
+    <string name="about_terms">Terms of Service</string>
+    <string name="about_privacy">Privacy Policy</string>
+    <string name="about_licenses">Open Source Licenses</string>
+    <string name="about_contact">Contact Us</string>
+    <string name="about_copyright">© 2026 SnapTranslate. All rights reserved.</string>
+    <string name="contact_email">support@example.com</string>
+    <string name="no_email_app">No email app found.</string>
+
+    <string name="help_text">1. Choose the language of the text (left) and the language you want (right).\n\n2. Tap Capture and photograph the text, or pick an image from the gallery.\n\n3. The translated text is drawn over the original, in the same place. Use \"Show original\" to compare.\n\n4. Tap any text block on the image — or the Edit button — to correct the recognized text or the translation.\n\n5. Tap Save to keep the result in History.\n\nTips: fill the frame with the text, hold steady, and avoid glare. The first translation for a new language downloads a small language model; after that everything works offline.</string>
+    <string name="terms_text">SnapTranslate is provided \"as is\", without warranty of any kind. Translations are produced automatically by an on-device model and may be inaccurate; do not rely on them for medical, legal or safety-critical decisions.</string>
+    <string name="privacy_text">Text recognition and translation run entirely on your device. Your photos, the recognized text and your history never leave the device. The app uses the network only to download translation language models from Google.</string>
+    <string name="licenses_text">AndroidX, CameraX and Material Components for Android — Apache License 2.0\n\nGoogle ML Kit (Text Recognition, Translation) — ML Kit Terms of Service\n\nMaterial Icons — Apache License 2.0</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_red">#C8102E</color>
+    <color name="brand_red_dark">#9E0B22</color>
+    <color name="brand_red_light">#E23650</color>
+    <color name="brand_pink">#FDE7EA</color>
+
+    <color name="bg_app">#F4F5F7</color>
+    <color name="text_primary">#1E2330</color>
+    <color name="text_secondary">#6F7685</color>
+    <color name="divider">#E6E8EC</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="white_muted">#E6FFFFFF</color>
+    <color name="scrim">#99000000</color>
+    <color name="camera_bar">#CC111111</color>
+</resources>
