@@ -14,17 +14,10 @@
         android:paddingEnd="4dp">
 
         <TextView
-            android:id="@+id/lang_flag"
-            android:layout_width="36dp"
-            android:layout_height="wrap_content"
-            android:textColor="@color/text_primary"
-            android:textSize="20sp" />
-
-        <TextView
             android:id="@+id/lang_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:layout_weight="1"
             android:textColor="@color/text_primary"
             android:textSize="14sp" />

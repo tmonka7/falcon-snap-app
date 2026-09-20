@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash -->
+    <string name="splash_steps">拍摄  ·  识别  ·  翻译</string>
+    <string name="splash_tagline">即时翻译\n你身边的文字</string>
+
+    <!-- Home / navigation -->
+    <string name="home_capture_title">点击拍摄</string>
+    <string name="home_capture_sub">拍照翻译文字</string>
+    <string name="home_gallery_sub">从相册选择图片</string>
+    <string name="home_history_sub">查看翻译历史</string>
+    <string name="home_settings_sub">语言、OCR 等</string>
+    <string name="nav_home">首页</string>
+    <string name="nav_history">历史</string>
+    <string name="nav_gallery">相册</string>
+    <string name="nav_settings">设置</string>
+    <string name="nav_help">帮助与支持</string>
+    <string name="nav_about">关于</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_back">返回</string>
+    <string name="cd_menu">打开菜单</string>
+    <string name="cd_flash">闪光灯模式</string>
+    <string name="cd_shutter">拍照</string>
+    <string name="cd_swap">交换语言</string>
+    <string name="cd_speak">朗读</string>
+    <string name="cd_clear">清除文字</string>
+    <string name="cd_apply">应用</string>
+    <string name="cd_delete_all">删除全部历史</string>
+    <string name="cd_previous">上一段文字</string>
+    <string name="cd_next">下一段文字</string>
+
+    <!-- Camera -->
+    <string name="camera_flip">翻转</string>
+    <string name="camera_permission_denied">需要相机权限才能拍摄文字。你仍然可以从相册选择图片。</string>
+    <string name="camera_unavailable">无法启动相机。</string>
+    <string name="capture_failed">拍摄失败，请重试。</string>
+
+    <!-- Processing / result -->
+    <string name="processing_loading">正在加载图片…</string>
+    <string name="processing_extracting">正在提取文字…</string>
+    <string name="processing_translating">正在翻译…</string>
+    <string name="processing_loading_model">正在加载翻译模型…\n（仅首次使用时需要几秒钟）</string>
+    <string name="processing_translating_fmt">正在翻译… %1$d / %2$d</string>
+    <string name="processing_rendering">正在替换文字…</string>
+    <string name="status_completed">翻译完成！</string>
+    <string name="status_no_text">未在图片中找到文字</string>
+    <string name="status_failed">翻译失败</string>
+    <string name="status_ocr_failed">文字识别失败</string>
+    <string name="status_load_failed">无法打开这张图片。</string>
+    <string name="label_original_fmt">%1$s（原文）</string>
+    <string name="label_translated_fmt">%1$s（译文）</string>
+    <string name="btn_edit">编辑</string>
+    <string name="btn_save">保存</string>
+    <string name="btn_apply">应用</string>
+    <string name="show_original">显示原图</string>
+    <string name="show_translated">显示译图</string>
+    <string name="saved_to_history">已保存到历史</string>
+    <string name="saved_to_history_and_gallery">已保存到历史和 Pictures/SnapTranslate</string>
+    <string name="save_failed">无法保存此翻译。</string>
+    <string name="copied">已复制到剪贴板</string>
+    <string name="tts_unavailable">该语言不支持朗读。</string>
+
+    <!-- Edit -->
+    <string name="title_edit">编辑翻译</string>
+    <string name="label_original_text">原文</string>
+    <string name="label_translated_text">译文</string>
+    <string name="block_counter_fmt">第 %1$d 段，共 %2$d 段</string>
+
+    <!-- Language selection -->
+    <string name="title_select_language">选择语言</string>
+    <string name="subtitle_translate_from">源语言</string>
+    <string name="subtitle_translate_to">目标语言</string>
+    <string name="search_language_hint">搜索语言…</string>
+    <string name="recent_languages">最近使用</string>
+    <string name="all_languages">全部语言</string>
+    <string name="ocr_model_missing">未安装 OCR 模型</string>
+
+    <!-- Names of the translation languages -->
+    <string name="lang_en">英语</string>
+    <string name="lang_zh">中文（简体）</string>
+    <string name="lang_ja">日语</string>
+    <string name="lang_ru">俄语</string>
+    <string name="lang_uk">乌克兰语</string>
+    <string name="lang_fr">法语</string>
+    <string name="lang_de">德语</string>
+    <string name="lang_es">西班牙语</string>
+    <string name="lang_it">意大利语</string>
+    <string name="lang_pt">葡萄牙语</string>
+    <string name="lang_nl">荷兰语</string>
+    <string name="lang_pl">波兰语</string>
+    <string name="lang_sv">瑞典语</string>
+    <string name="lang_tr">土耳其语</string>
+    <string name="lang_vi">越南语</string>
+    <string name="lang_id">印度尼西亚语</string>
+    <string name="lang_ms">马来语</string>
+    <string name="lang_tl">菲律宾语</string>
+    <string name="lang_hi">印地语</string>
+    <string name="lang_th">泰语</string>
+    <string name="lang_ar">阿拉伯语</string>
+
+    <!-- History -->
+    <string name="title_history">翻译历史</string>
+    <string name="filter_all">全部</string>
+    <string name="history_empty">还没有保存的翻译。\n拍摄文字后点击“保存”。</string>
+    <string name="delete_entry_title">删除这条翻译？</string>
+    <string name="delete_all_title">删除全部历史？</string>
+    <string name="delete">删除</string>
+    <string name="cancel">取消</string>
+    <string name="ok">确定</string>
+
+    <!-- Settings -->
+    <string name="title_settings">设置</string>
+    <string name="setting_ocr_language">OCR 语言</string>
+    <string name="setting_target_language">目标语言</string>
+    <string name="setting_auto_replace">自动替换文字</string>
+    <string name="setting_save_original">保存原始图片</string>
+    <string name="setting_models">离线模型</string>
+    <string name="setting_app_language">应用语言</string>
+    <string name="app_language_system">跟随系统</string>
+
+    <!-- Models -->
+    <string name="title_models">离线模型</string>
+    <string name="models_intro">文字识别和翻译完全在本机运行，使用下方文件夹中的模型文件，不会下载任何内容。请从电脑把文件复制到该文件夹，或从本机的某个文件夹导入。要使用重新训练的模型，只需替换对应的文件。</string>
+    <string name="models_group_nllb">翻译 · NLLB-200</string>
+    <string name="model_det">文字检测</string>
+    <string name="model_rec_fmt">文字识别“%1$s”</string>
+    <string name="model_encoder">编码器</string>
+    <string name="model_decoder">解码器</string>
+    <string name="model_decoder_with_past">解码器（带缓存）</string>
+    <string name="model_tokenizer">分词器</string>
+    <string name="model_missing">未安装</string>
+    <string name="model_optional">未安装（可选）</string>
+    <string name="import_models">从文件夹导入…</string>
+    <string name="import_scanning">正在查找模型文件…</string>
+    <string name="import_progress_fmt">正在复制 %1$s\n%2$s / %3$s</string>
+    <string name="import_done_fmt">已导入 %1$d 个文件</string>
+    <string name="import_none">该文件夹中没有找到模型文件。</string>
+    <string name="import_failed_fmt">导入失败：%1$s</string>
+    <string name="models_missing_title">未安装模型</string>
+    <string name="models_missing_message">缺少：%1$s\n\n本应用离线运行，需要你把模型文件复制到设备上。打开模型管理查看需要哪些文件以及放在哪里。</string>
+    <string name="open_model_manager">模型管理</string>
+    <string name="model_error_title">模型错误</string>
+
+    <!-- About -->
+    <string name="title_about">关于</string>
+    <string name="about_version_fmt">版本 %1$s</string>
+    <string name="about_tagline">拍摄、提取、翻译。\n打破语言障碍。</string>
+    <string name="about_terms">服务条款</string>
+    <string name="about_privacy">隐私政策</string>
+    <string name="about_licenses">开源许可</string>
+    <string name="about_contact">联系我们</string>
+    <string name="no_email_app">未找到邮件应用。</string>
+
+    <string name="help_text">1. 选择文字的语言（左）和想要翻译成的语言（右）。\n\n2. 点击“拍摄”对准文字拍照，或从相册选择图片。\n\n3. 译文会绘制在原文的相同位置。点击“显示原图”可以对比。\n\n4. 点击图片上的任意文字块，或点击“编辑”按钮，可以修改识别出的文字或译文。\n\n5. 点击“保存”将结果保留在历史中。\n\n提示：让文字充满取景框，保持稳定，避免反光。所有功能均使用“设置 › 离线模型”中列出的模型离线运行；打开应用后的第一次翻译需要多等几秒来加载模型。</string>
+    <string name="terms_text">SnapTranslate 按“现状”提供，不作任何形式的保证。译文由设备上的模型自动生成，可能不准确；请勿将其用于医疗、法律或涉及安全的决定。</string>
+    <string name="privacy_text">文字识别和翻译完全在你的设备上运行。本应用没有网络权限：你的照片、识别出的文字和历史记录都无法离开设备。</string>
+</resources>

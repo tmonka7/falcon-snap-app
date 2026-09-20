@@ -12,7 +12,7 @@ Output (copy the whole folder to the device, see MODELS.md):
 Typical use:
 
     # everything from the public checkpoints (int8 NLLB, ~0.9 GB)
-    python tools/export_models.py --ocr main korean latin --nllb prebuilt
+    python tools/export_models.py --ocr main latin eslav --nllb prebuilt
 
     # after retraining: point at your own checkpoints instead
     python tools/export_models.py --ocr-rec main=./my_rec_infer --nllb ./my-finetuned-nllb
@@ -34,8 +34,7 @@ from huggingface_hub import hf_hub_download, snapshot_download
 # App recognizer key -> official PP-OCRv5 recognition model (https://huggingface.co/PaddlePaddle).
 # The keys are the ones in app/src/main/java/com/falcon/snap/model/Language.java.
 OCR_REC_MODELS = {
-    "main": "PP-OCRv5_mobile_rec",  # Simplified + Traditional Chinese, English, Japanese
-    "korean": "korean_PP-OCRv5_mobile_rec",
+    "main": "PP-OCRv5_mobile_rec",  # Chinese, English, Japanese
     "latin": "latin_PP-OCRv5_mobile_rec",
     "eslav": "eslav_PP-OCRv5_mobile_rec",  # Russian, Ukrainian, Belarusian
     "cyrillic": "cyrillic_PP-OCRv5_mobile_rec",

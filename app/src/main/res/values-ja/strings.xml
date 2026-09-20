@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash -->
+    <string name="splash_steps">撮影  ·  OCR  ·  翻訳</string>
+    <string name="splash_tagline">身の回りの文字を\nすぐに翻訳</string>
+
+    <!-- Home / navigation -->
+    <string name="home_capture_title">タップして撮影</string>
+    <string name="home_capture_sub">写真を撮って文字を翻訳</string>
+    <string name="home_gallery_sub">ギャラリーから画像を選択</string>
+    <string name="home_history_sub">翻訳履歴を見る</string>
+    <string name="home_settings_sub">言語、OCR など</string>
+    <string name="nav_home">ホーム</string>
+    <string name="nav_history">履歴</string>
+    <string name="nav_gallery">ギャラリー</string>
+    <string name="nav_settings">設定</string>
+    <string name="nav_help">ヘルプとサポート</string>
+    <string name="nav_about">このアプリについて</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_back">戻る</string>
+    <string name="cd_menu">メニューを開く</string>
+    <string name="cd_flash">フラッシュモード</string>
+    <string name="cd_shutter">写真を撮る</string>
+    <string name="cd_swap">言語を入れ替える</string>
+    <string name="cd_speak">読み上げる</string>
+    <string name="cd_clear">テキストを消去</string>
+    <string name="cd_apply">適用</string>
+    <string name="cd_delete_all">履歴をすべて削除</string>
+    <string name="cd_previous">前のテキスト</string>
+    <string name="cd_next">次のテキスト</string>
+
+    <!-- Camera -->
+    <string name="camera_flip">切替</string>
+    <string name="camera_permission_denied">文字を撮影するにはカメラの権限が必要です。ギャラリーから画像を選ぶことはできます。</string>
+    <string name="camera_unavailable">カメラを起動できませんでした。</string>
+    <string name="capture_failed">撮影に失敗しました。もう一度お試しください。</string>
+
+    <!-- Processing / result -->
+    <string name="processing_loading">画像を読み込み中…</string>
+    <string name="processing_extracting">文字を抽出中…</string>
+    <string name="processing_translating">翻訳中…</string>
+    <string name="processing_loading_model">翻訳モデルを読み込み中…\n（初回のみ数秒かかります）</string>
+    <string name="processing_translating_fmt">翻訳中… %1$d / %2$d</string>
+    <string name="processing_rendering">文字を置き換え中…</string>
+    <string name="status_completed">翻訳が完了しました！</string>
+    <string name="status_no_text">この画像に文字が見つかりません</string>
+    <string name="status_failed">翻訳に失敗しました</string>
+    <string name="status_ocr_failed">文字認識に失敗しました</string>
+    <string name="status_load_failed">この画像を開けませんでした。</string>
+    <string name="label_original_fmt">%1$s（原文）</string>
+    <string name="label_translated_fmt">%1$s（訳文）</string>
+    <string name="btn_edit">編集</string>
+    <string name="btn_save">保存</string>
+    <string name="btn_apply">適用</string>
+    <string name="show_original">原文を表示</string>
+    <string name="show_translated">訳文を表示</string>
+    <string name="saved_to_history">履歴に保存しました</string>
+    <string name="saved_to_history_and_gallery">履歴と Pictures/SnapTranslate に保存しました</string>
+    <string name="save_failed">この翻訳を保存できませんでした。</string>
+    <string name="copied">クリップボードにコピーしました</string>
+    <string name="tts_unavailable">この言語は読み上げに対応していません。</string>
+
+    <!-- Edit -->
+    <string name="title_edit">翻訳を編集</string>
+    <string name="label_original_text">原文</string>
+    <string name="label_translated_text">訳文</string>
+    <string name="block_counter_fmt">テキスト %1$d / %2$d</string>
+
+    <!-- Language selection -->
+    <string name="title_select_language">言語を選択</string>
+    <string name="subtitle_translate_from">翻訳元</string>
+    <string name="subtitle_translate_to">翻訳先</string>
+    <string name="search_language_hint">言語を検索…</string>
+    <string name="recent_languages">最近使った言語</string>
+    <string name="all_languages">すべての言語</string>
+    <string name="ocr_model_missing">OCR モデル未インストール</string>
+
+    <!-- Names of the translation languages -->
+    <string name="lang_en">英語</string>
+    <string name="lang_zh">中国語（簡体字）</string>
+    <string name="lang_ja">日本語</string>
+    <string name="lang_ru">ロシア語</string>
+    <string name="lang_uk">ウクライナ語</string>
+    <string name="lang_fr">フランス語</string>
+    <string name="lang_de">ドイツ語</string>
+    <string name="lang_es">スペイン語</string>
+    <string name="lang_it">イタリア語</string>
+    <string name="lang_pt">ポルトガル語</string>
+    <string name="lang_nl">オランダ語</string>
+    <string name="lang_pl">ポーランド語</string>
+    <string name="lang_sv">スウェーデン語</string>
+    <string name="lang_tr">トルコ語</string>
+    <string name="lang_vi">ベトナム語</string>
+    <string name="lang_id">インドネシア語</string>
+    <string name="lang_ms">マレー語</string>
+    <string name="lang_tl">フィリピン語</string>
+    <string name="lang_hi">ヒンディー語</string>
+    <string name="lang_th">タイ語</string>
+    <string name="lang_ar">アラビア語</string>
+
+    <!-- History -->
+    <string name="title_history">翻訳履歴</string>
+    <string name="filter_all">すべて</string>
+    <string name="history_empty">保存された翻訳はまだありません。\n撮影して「保存」をタップしてください。</string>
+    <string name="delete_entry_title">この翻訳を削除しますか？</string>
+    <string name="delete_all_title">履歴をすべて削除しますか？</string>
+    <string name="delete">削除</string>
+    <string name="cancel">キャンセル</string>
+    <string name="ok">OK</string>
+
+    <!-- Settings -->
+    <string name="title_settings">設定</string>
+    <string name="setting_ocr_language">OCR 言語</string>
+    <string name="setting_target_language">翻訳先の言語</string>
+    <string name="setting_auto_replace">文字を自動で置き換える</string>
+    <string name="setting_save_original">元の画像を保存</string>
+    <string name="setting_models">オフラインモデル</string>
+    <string name="setting_app_language">アプリの言語</string>
+    <string name="app_language_system">システムの設定に従う</string>
+
+    <!-- Models -->
+    <string name="title_models">オフラインモデル</string>
+    <string name="models_intro">文字認識と翻訳は、下のフォルダにあるモデルファイルを使って、すべてこの端末上で実行されます。ダウンロードは一切行いません。パソコンからこのフォルダにファイルをコピーするか、端末内のフォルダからインポートしてください。再学習したモデルを使うには、該当するファイルを置き換えるだけです。</string>
+    <string name="models_group_nllb">翻訳 · NLLB-200</string>
+    <string name="model_det">文字検出</string>
+    <string name="model_rec_fmt">文字認識「%1$s」</string>
+    <string name="model_encoder">エンコーダー</string>
+    <string name="model_decoder">デコーダー</string>
+    <string name="model_decoder_with_past">デコーダー（キャッシュ付き）</string>
+    <string name="model_tokenizer">トークナイザー</string>
+    <string name="model_missing">未インストール</string>
+    <string name="model_optional">未インストール（任意）</string>
+    <string name="import_models">フォルダからインポート…</string>
+    <string name="import_scanning">モデルファイルを探しています…</string>
+    <string name="import_progress_fmt">%1$s をコピー中\n%2$s / %3$s</string>
+    <string name="import_done_fmt">%1$d 個のファイルをインポートしました</string>
+    <string name="import_none">このフォルダにモデルファイルは見つかりませんでした。</string>
+    <string name="import_failed_fmt">インポートに失敗しました：%1$s</string>
+    <string name="models_missing_title">モデルがインストールされていません</string>
+    <string name="models_missing_message">不足：%1$s\n\nこのアプリは、端末にコピーしたモデルファイルを使ってオフラインで動作します。モデル管理を開くと、必要なファイルと置き場所を確認できます。</string>
+    <string name="open_model_manager">モデル管理</string>
+    <string name="model_error_title">モデルエラー</string>
+
+    <!-- About -->
+    <string name="title_about">このアプリについて</string>
+    <string name="about_version_fmt">バージョン %1$s</string>
+    <string name="about_tagline">撮影、抽出、翻訳。\n言葉の壁をなくそう。</string>
+    <string name="about_terms">利用規約</string>
+    <string name="about_privacy">プライバシーポリシー</string>
+    <string name="about_licenses">オープンソースライセンス</string>
+    <string name="about_contact">お問い合わせ</string>
+    <string name="no_email_app">メールアプリが見つかりません。</string>
+
+    <string name="help_text">1. 文字の言語（左）と翻訳先の言語（右）を選びます。\n\n2. 「撮影」をタップして文字を撮影するか、ギャラリーから画像を選びます。\n\n3. 訳文は原文と同じ位置に重ねて描画されます。「原文を表示」で比較できます。\n\n4. 画像上の文字ブロック、または「編集」ボタンをタップすると、認識された文字や訳文を修正できます。\n\n5. 「保存」をタップすると結果が履歴に残ります。\n\nヒント：文字を画面いっぱいに写し、端末を動かさず、反射を避けてください。すべての機能は「設定 › オフラインモデル」に表示されるモデルを使ってオフラインで動作します。アプリを開いて最初の翻訳は、モデルの読み込みのため数秒余分にかかります。</string>
+    <string name="terms_text">SnapTranslate は「現状のまま」提供され、いかなる保証もありません。翻訳は端末上のモデルによって自動生成されるため、不正確な場合があります。医療、法律、安全に関わる判断には使用しないでください。</string>
+    <string name="privacy_text">文字認識と翻訳はすべてお使いの端末上で実行されます。このアプリにはインターネットの権限がありません。写真、認識された文字、履歴が端末の外に出ることはありません。</string>
+</resources>

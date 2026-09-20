@@ -90,7 +90,7 @@ public class LanguageSelectActivity extends BaseActivity {
         List<Language> matches = new ArrayList<>();
         for (Language language : Language.all()) {
             boolean matchesQuery = needle.isEmpty()
-                    || language.name.toLowerCase(Locale.ROOT).contains(needle)
+                    || language.name(this).toLowerCase(Locale.ROOT).contains(needle)
                     || language.shortName.toLowerCase(Locale.ROOT).contains(needle);
             if (matchesQuery) {
                 matches.add(language);
@@ -165,10 +165,10 @@ public class LanguageSelectActivity extends BaseActivity {
             Language language = (Language) row;
             LanguageHolder h = (LanguageHolder) holder;
             boolean selected = language.code.equals(current.code);
-            h.flag.setText(language.flag());
             // A source language needs an installed OCR model; say so rather than hiding the language.
             boolean readable = !pickSource || readableCodes.contains(language.code);
-            h.name.setText(readable ? language.name : language.name + "  ·  " + getString(R.string.ocr_model_missing));
+            String name = language.name(LanguageSelectActivity.this);
+            h.name.setText(readable ? name : name + "  ·  " + getString(R.string.ocr_model_missing));
             h.name.setAlpha(readable ? 1f : 0.5f);
             h.radio.setChecked(selected);
             if (selected) {
@@ -190,13 +190,11 @@ public class LanguageSelectActivity extends BaseActivity {
     }
 
     private static final class LanguageHolder extends RecyclerView.ViewHolder {
-        final TextView flag;
         final TextView name;
         final RadioButton radio;
 
         LanguageHolder(View itemView) {
             super(itemView);
-            flag = itemView.findViewById(R.id.lang_flag);
             name = itemView.findViewById(R.id.lang_name);
             radio = itemView.findViewById(R.id.lang_radio);
         }

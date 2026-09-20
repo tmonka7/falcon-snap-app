@@ -16,7 +16,7 @@ models/
   ocr/
     det.onnx                         text detection (one model for all languages)
     rec_main.onnx   rec_main.txt     recognition + character dictionary
-    rec_korean.onnx rec_korean.txt   (optional, one pair per script family)
+    rec_eslav.onnx  rec_eslav.txt    (optional, one pair per script family)
     ...
   nllb/
     encoder_model_quantized.onnx
@@ -40,8 +40,7 @@ device and what is installed or missing.
 
 | key | PP-OCRv5 model | used for |
 |---|---|---|
-| `main` | `PP-OCRv5_mobile_rec` | English, Chinese (Simplified + Traditional), Japanese. **Required.** |
-| `korean` | `korean_PP-OCRv5_mobile_rec` | Korean |
+| `main` | `PP-OCRv5_mobile_rec` | English, Chinese, Japanese. **Required.** |
 | `latin` | `latin_PP-OCRv5_mobile_rec` | French, German, Spanish, … (falls back to `main`, which loses accents) |
 | `eslav` | `eslav_PP-OCRv5_mobile_rec` | Russian, Ukrainian (`cyrillic` is accepted as an alternative) |
 | `th` | `th_PP-OCRv5_mobile_rec` | Thai |
@@ -72,7 +71,7 @@ the phone never does):
 pip install huggingface_hub pyyaml
 pip install paddlepaddle paddlex && paddlex --install paddle2onnx      # OCR conversion
 
-python tools/export_models.py --ocr main korean latin --nllb prebuilt
+python tools/export_models.py --ocr main latin eslav --nllb prebuilt
 ```
 
 `--nllb prebuilt` downloads the ready-made int8 ONNX export (`Xenova/nllb-200-distilled-600M`).

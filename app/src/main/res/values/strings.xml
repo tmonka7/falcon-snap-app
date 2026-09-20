@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SnapTranslate</string>
+    <string name="app_name" translatable="false">SnapTranslate</string>
 
     <!-- Splash -->
     <string name="splash_steps">Capture  ·  OCR  ·  Translate</string>
@@ -78,6 +78,29 @@
     <string name="all_languages">All Languages</string>
     <string name="ocr_model_missing">OCR model not installed</string>
 
+    <!-- Names of the translation languages -->
+    <string name="lang_en">English</string>
+    <string name="lang_zh">Chinese (Simplified)</string>
+    <string name="lang_ja">Japanese</string>
+    <string name="lang_ru">Russian</string>
+    <string name="lang_uk">Ukrainian</string>
+    <string name="lang_fr">French</string>
+    <string name="lang_de">German</string>
+    <string name="lang_es">Spanish</string>
+    <string name="lang_it">Italian</string>
+    <string name="lang_pt">Portuguese</string>
+    <string name="lang_nl">Dutch</string>
+    <string name="lang_pl">Polish</string>
+    <string name="lang_sv">Swedish</string>
+    <string name="lang_tr">Turkish</string>
+    <string name="lang_vi">Vietnamese</string>
+    <string name="lang_id">Indonesian</string>
+    <string name="lang_ms">Malay</string>
+    <string name="lang_tl">Filipino</string>
+    <string name="lang_hi">Hindi</string>
+    <string name="lang_th">Thai</string>
+    <string name="lang_ar">Arabic</string>
+
     <!-- History -->
     <string name="title_history">Translation History</string>
     <string name="filter_all">All</string>
@@ -95,11 +118,13 @@
     <string name="setting_auto_replace">Auto Replace Text</string>
     <string name="setting_save_original">Save Original Image</string>
     <string name="setting_models">Offline Models</string>
+    <string name="setting_app_language">App Language</string>
+    <string name="app_language_system">System default</string>
 
     <!-- Models -->
     <string name="title_models">Offline Models</string>
     <string name="models_intro">OCR and translation run entirely on this device, using the model files in the folder below. Nothing is downloaded. Copy the files there from a computer, or import them from a folder on this device. To use a retrained model, replace its file.</string>
-    <string name="models_group_ocr">OCR · PaddleOCR PP-OCRv5</string>
+    <string name="models_group_ocr" translatable="false">OCR · PaddleOCR PP-OCRv5</string>
     <string name="models_group_nllb">Translation · NLLB-200</string>
     <string name="model_det">Text detection</string>
     <string name="model_rec_fmt">Recognition “%1$s”</string>
@@ -128,12 +153,12 @@
     <string name="about_privacy">Privacy Policy</string>
     <string name="about_licenses">Open Source Licenses</string>
     <string name="about_contact">Contact Us</string>
-    <string name="about_copyright">© 2026 SnapTranslate. All rights reserved.</string>
-    <string name="contact_email">support@example.com</string>
+    <string name="about_copyright" translatable="false">© 2026 SnapTranslate. All rights reserved.</string>
+    <string name="contact_email" translatable="false">support@example.com</string>
     <string name="no_email_app">No email app found.</string>
 
     <string name="help_text">1. Choose the language of the text (left) and the language you want (right).\n\n2. Tap Capture and photograph the text, or pick an image from the gallery.\n\n3. The translated text is drawn over the original, in the same place. Use \"Show original\" to compare.\n\n4. Tap any text block on the image — or the Edit button — to correct the recognized text or the translation.\n\n5. Tap Save to keep the result in History.\n\nTips: fill the frame with the text, hold steady, and avoid glare. Everything runs offline with the models listed under Settings › Offline Models; the first translation after opening the app takes a few extra seconds while the model loads.</string>
     <string name="terms_text">SnapTranslate is provided \"as is\", without warranty of any kind. Translations are produced automatically by an on-device model and may be inaccurate; do not rely on them for medical, legal or safety-critical decisions.</string>
     <string name="privacy_text">Text recognition and translation run entirely on your device. The app has no internet permission: your photos, the recognized text and your history cannot leave the device.</string>
-    <string name="licenses_text">AndroidX, CameraX and Material Components for Android — Apache License 2.0\n\nONNX Runtime — MIT License\n\nPaddleOCR PP-OCRv5 models — Apache License 2.0\n\nNLLB-200 model (Meta AI) — CC-BY-NC 4.0, non-commercial use only\n\nMaterial Icons — Apache License 2.0</string>
+    <string name="licenses_text" translatable="false">AndroidX, CameraX and Material Components for Android — Apache License 2.0\n\nONNX Runtime — MIT License\n\nPaddleOCR PP-OCRv5 models — Apache License 2.0\n\nNLLB-200 model (Meta AI) — CC-BY-NC 4.0, non-commercial use only\n\nMaterial Icons — Apache License 2.0</string>
 </resources>

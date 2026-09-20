@@ -57,8 +57,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         TextView source = findViewById(R.id.lang_source);
         TextView target = findViewById(R.id.lang_target);
         if (source != null && target != null) {
-            source.setText(prefs.source().label());
-            target.setText(prefs.target().label());
+            source.setText(prefs.source().shortName);
+            target.setText(prefs.target().shortName);
         }
     }
 

@@ -1,6 +1,9 @@
 package com.falcon.snap.model;
 
+import android.content.Context;
 import android.text.TextUtils;
+
+import com.falcon.snap.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,9 +19,8 @@ import java.util.Locale;
  * installed as {@code models/ocr/rec_KEY.onnx} (see MODELS.md).
  */
 public final class Language {
-    /** PP-OCRv5_mobile_rec: Simplified and Traditional Chinese, English, Japanese. */
+    /** PP-OCRv5_mobile_rec: Chinese, English, Japanese. */
     public static final String OCR_MAIN = "main";
-    public static final String OCR_KOREAN = "korean";
     public static final String OCR_LATIN = "latin";
     /** East Slavic: Russian, Ukrainian, Belarusian. */
     public static final String OCR_ESLAV = "eslav";
@@ -31,49 +33,44 @@ public final class Language {
     public final String code;
     /** NLLB-200 (FLORES-200) language token, e.g. "eng_Latn". */
     public final String nllbCode;
-    /** English name, shown in lists. */
-    public final String name;
-    /** Native name, shown in the compact language bars. */
+    /** Name in the app's interface language, shown in lists. See {@link #name(Context)}. */
+    private final int nameRes;
+    /** Native name, shown in the compact language bars. Deliberately not localized. */
     public final String shortName;
-    /** ISO country code used to build the flag emoji. */
-    private final String country;
     /** Recognition models able to read this language, in order of preference. */
     public final String[] ocrKeys;
 
-    private Language(String code, String nllbCode, String name, String shortName, String country, String... ocrKeys) {
+    private Language(String code, String nllbCode, int nameRes, String shortName, String... ocrKeys) {
         this.code = code;
         this.nllbCode = nllbCode;
-        this.name = name;
+        this.nameRes = nameRes;
         this.shortName = shortName;
-        this.country = country;
         this.ocrKeys = ocrKeys;
     }
 
     private static final Language[] CATALOG = {
-            new Language("en", "eng_Latn", "English", "English", "GB", OCR_MAIN, OCR_LATIN),
-            new Language("zh", "zho_Hans", "Chinese (Simplified)", "中文", "CN", OCR_MAIN),
-            new Language("zh-TW", "zho_Hant", "Chinese (Traditional)", "繁體中文", "CN", OCR_MAIN),
-            new Language("ja", "jpn_Jpan", "Japanese", "日本語", "JP", OCR_MAIN),
-            new Language("ko", "kor_Hang", "Korean", "한국어", "KR", OCR_KOREAN),
+            new Language("en", "eng_Latn", R.string.lang_en, "English", OCR_MAIN, OCR_LATIN),
+            new Language("zh", "zho_Hans", R.string.lang_zh, "中文", OCR_MAIN),
+            new Language("ru", "rus_Cyrl", R.string.lang_ru, "Русский", OCR_ESLAV, OCR_CYRILLIC),
+            new Language("ja", "jpn_Jpan", R.string.lang_ja, "日本語", OCR_MAIN),
+            new Language("uk", "ukr_Cyrl", R.string.lang_uk, "Українська", OCR_ESLAV, OCR_CYRILLIC),
             // The main model reads unaccented Latin text, so it is a usable fallback for these.
-            new Language("fr", "fra_Latn", "French", "Français", "FR", OCR_LATIN, OCR_MAIN),
-            new Language("de", "deu_Latn", "German", "Deutsch", "DE", OCR_LATIN, OCR_MAIN),
-            new Language("es", "spa_Latn", "Spanish", "Español", "ES", OCR_LATIN, OCR_MAIN),
-            new Language("it", "ita_Latn", "Italian", "Italiano", "IT", OCR_LATIN, OCR_MAIN),
-            new Language("pt", "por_Latn", "Portuguese", "Português", "PT", OCR_LATIN, OCR_MAIN),
-            new Language("nl", "nld_Latn", "Dutch", "Nederlands", "NL", OCR_LATIN, OCR_MAIN),
-            new Language("pl", "pol_Latn", "Polish", "Polski", "PL", OCR_LATIN, OCR_MAIN),
-            new Language("sv", "swe_Latn", "Swedish", "Svenska", "SE", OCR_LATIN, OCR_MAIN),
-            new Language("tr", "tur_Latn", "Turkish", "Türkçe", "TR", OCR_LATIN, OCR_MAIN),
-            new Language("vi", "vie_Latn", "Vietnamese", "Tiếng Việt", "VN", OCR_LATIN, OCR_MAIN),
-            new Language("id", "ind_Latn", "Indonesian", "Indonesia", "ID", OCR_LATIN, OCR_MAIN),
-            new Language("ms", "zsm_Latn", "Malay", "Melayu", "MY", OCR_LATIN, OCR_MAIN),
-            new Language("tl", "tgl_Latn", "Filipino", "Filipino", "PH", OCR_LATIN, OCR_MAIN),
-            new Language("hi", "hin_Deva", "Hindi", "हिन्दी", "IN", OCR_DEVANAGARI),
-            new Language("ru", "rus_Cyrl", "Russian", "Русский", "RU", OCR_ESLAV, OCR_CYRILLIC),
-            new Language("uk", "ukr_Cyrl", "Ukrainian", "Українська", "UA", OCR_ESLAV, OCR_CYRILLIC),
-            new Language("th", "tha_Thai", "Thai", "ไทย", "TH", OCR_THAI),
-            new Language("ar", "arb_Arab", "Arabic", "العربية", "SA", OCR_ARABIC),
+            new Language("fr", "fra_Latn", R.string.lang_fr, "Français", OCR_LATIN, OCR_MAIN),
+            new Language("de", "deu_Latn", R.string.lang_de, "Deutsch", OCR_LATIN, OCR_MAIN),
+            new Language("es", "spa_Latn", R.string.lang_es, "Español", OCR_LATIN, OCR_MAIN),
+            new Language("it", "ita_Latn", R.string.lang_it, "Italiano", OCR_LATIN, OCR_MAIN),
+            new Language("pt", "por_Latn", R.string.lang_pt, "Português", OCR_LATIN, OCR_MAIN),
+            new Language("nl", "nld_Latn", R.string.lang_nl, "Nederlands", OCR_LATIN, OCR_MAIN),
+            new Language("pl", "pol_Latn", R.string.lang_pl, "Polski", OCR_LATIN, OCR_MAIN),
+            new Language("sv", "swe_Latn", R.string.lang_sv, "Svenska", OCR_LATIN, OCR_MAIN),
+            new Language("tr", "tur_Latn", R.string.lang_tr, "Türkçe", OCR_LATIN, OCR_MAIN),
+            new Language("vi", "vie_Latn", R.string.lang_vi, "Tiếng Việt", OCR_LATIN, OCR_MAIN),
+            new Language("id", "ind_Latn", R.string.lang_id, "Indonesia", OCR_LATIN, OCR_MAIN),
+            new Language("ms", "zsm_Latn", R.string.lang_ms, "Melayu", OCR_LATIN, OCR_MAIN),
+            new Language("tl", "tgl_Latn", R.string.lang_tl, "Filipino", OCR_LATIN, OCR_MAIN),
+            new Language("hi", "hin_Deva", R.string.lang_hi, "हिन्दी", OCR_DEVANAGARI),
+            new Language("th", "tha_Thai", R.string.lang_th, "ไทย", OCR_THAI),
+            new Language("ar", "arb_Arab", R.string.lang_ar, "العربية", OCR_ARABIC),
     };
 
     public static List<Language> all() {
@@ -94,11 +91,11 @@ public final class Language {
     }
 
     /** Names of the languages a recognition model serves, e.g. "Russian, Ukrainian". */
-    public static String languagesFor(String ocrKey) {
+    public static String languagesFor(Context context, String ocrKey) {
         List<String> names = new ArrayList<>();
         for (Language language : CATALOG) {
             if (language.ocrKeys[0].equals(ocrKey)) {
-                names.add(language.name);
+                names.add(language.name(context));
             }
         }
         return TextUtils.join(", ", names);
@@ -114,26 +111,17 @@ public final class Language {
         return CATALOG[0];
     }
 
+    /** The language's name in the app's current interface language. Pass an Activity, not the Application. */
+    public String name(Context context) {
+        return context.getString(nameRes);
+    }
+
     /** Scripts written without spaces: lines (and translated sentences) are joined directly. */
     public boolean joinsWithoutSpaces() {
-        return code.equals("zh") || code.equals("zh-TW") || code.equals("ja") || code.equals("th");
-    }
-
-    /** Flag emoji built from the two regional-indicator code points of the country code. */
-    public String flag() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < country.length(); i++) {
-            sb.appendCodePoint(0x1F1E6 + (country.charAt(i) - 'A'));
-        }
-        return sb.toString();
-    }
-
-    /** "flag + native name", used by the language bars. */
-    public String label() {
-        return flag() + "  " + shortName;
+        return code.equals("zh") || code.equals("ja") || code.equals("th");
     }
 
     public Locale locale() {
-        return "zh-TW".equals(code) ? Locale.TRADITIONAL_CHINESE : Locale.forLanguageTag(code);
+        return Locale.forLanguageTag(code);
     }
 }

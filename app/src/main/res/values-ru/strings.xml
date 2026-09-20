@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash -->
+    <string name="splash_steps">Снимок  ·  OCR  ·  Перевод</string>
+    <string name="splash_tagline">Переводите текст вокруг вас\n— мгновенно</string>
+
+    <!-- Home / navigation -->
+    <string name="home_capture_title">Сделать снимок</string>
+    <string name="home_capture_sub">Сфотографируйте текст для перевода</string>
+    <string name="home_gallery_sub">Выбрать изображение из галереи</string>
+    <string name="home_history_sub">История переводов</string>
+    <string name="home_settings_sub">Язык, OCR и другое</string>
+    <string name="nav_home">Главная</string>
+    <string name="nav_history">История</string>
+    <string name="nav_gallery">Галерея</string>
+    <string name="nav_settings">Настройки</string>
+    <string name="nav_help">Справка и поддержка</string>
+    <string name="nav_about">О приложении</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_back">Назад</string>
+    <string name="cd_menu">Открыть меню</string>
+    <string name="cd_flash">Режим вспышки</string>
+    <string name="cd_shutter">Сделать снимок</string>
+    <string name="cd_swap">Поменять языки местами</string>
+    <string name="cd_speak">Прочитать вслух</string>
+    <string name="cd_clear">Очистить текст</string>
+    <string name="cd_apply">Применить</string>
+    <string name="cd_delete_all">Удалить всю историю</string>
+    <string name="cd_previous">Предыдущий текст</string>
+    <string name="cd_next">Следующий текст</string>
+
+    <!-- Camera -->
+    <string name="camera_flip">Сменить</string>
+    <string name="camera_permission_denied">Для съёмки текста нужен доступ к камере. Вы по-прежнему можете выбрать изображение из галереи.</string>
+    <string name="camera_unavailable">Не удалось запустить камеру.</string>
+    <string name="capture_failed">Не удалось сделать снимок. Попробуйте ещё раз.</string>
+
+    <!-- Processing / result -->
+    <string name="processing_loading">Загрузка изображения…</string>
+    <string name="processing_extracting">Распознавание текста…</string>
+    <string name="processing_translating">Перевод…</string>
+    <string name="processing_loading_model">Загрузка модели перевода…\n(несколько секунд, только при первом использовании)</string>
+    <string name="processing_translating_fmt">Перевод… %1$d / %2$d</string>
+    <string name="processing_rendering">Замена текста…</string>
+    <string name="status_completed">Перевод выполнен!</string>
+    <string name="status_no_text">На изображении не найден текст</string>
+    <string name="status_failed">Не удалось перевести</string>
+    <string name="status_ocr_failed">Не удалось распознать текст</string>
+    <string name="status_load_failed">Не удалось открыть изображение.</string>
+    <string name="label_original_fmt">%1$s (оригинал)</string>
+    <string name="label_translated_fmt">%1$s (перевод)</string>
+    <string name="btn_edit">Изменить</string>
+    <string name="btn_save">Сохранить</string>
+    <string name="btn_apply">Применить</string>
+    <string name="show_original">Показать оригинал</string>
+    <string name="show_translated">Показать перевод</string>
+    <string name="saved_to_history">Сохранено в истории</string>
+    <string name="saved_to_history_and_gallery">Сохранено в истории и в Pictures/SnapTranslate</string>
+    <string name="save_failed">Не удалось сохранить перевод.</string>
+    <string name="copied">Скопировано в буфер обмена</string>
+    <string name="tts_unavailable">Озвучивание для этого языка недоступно.</string>
+
+    <!-- Edit -->
+    <string name="title_edit">Правка перевода</string>
+    <string name="label_original_text">Исходный текст</string>
+    <string name="label_translated_text">Перевод</string>
+    <string name="block_counter_fmt">Текст %1$d из %2$d</string>
+
+    <!-- Language selection -->
+    <string name="title_select_language">Выбор языка</string>
+    <string name="subtitle_translate_from">Перевести с</string>
+    <string name="subtitle_translate_to">Перевести на</string>
+    <string name="search_language_hint">Поиск языка…</string>
+    <string name="recent_languages">Недавние языки</string>
+    <string name="all_languages">Все языки</string>
+    <string name="ocr_model_missing">Модель OCR не установлена</string>
+
+    <!-- Names of the translation languages -->
+    <string name="lang_en">Английский</string>
+    <string name="lang_zh">Китайский (упрощённый)</string>
+    <string name="lang_ja">Японский</string>
+    <string name="lang_ru">Русский</string>
+    <string name="lang_uk">Украинский</string>
+    <string name="lang_fr">Французский</string>
+    <string name="lang_de">Немецкий</string>
+    <string name="lang_es">Испанский</string>
+    <string name="lang_it">Итальянский</string>
+    <string name="lang_pt">Португальский</string>
+    <string name="lang_nl">Нидерландский</string>
+    <string name="lang_pl">Польский</string>
+    <string name="lang_sv">Шведский</string>
+    <string name="lang_tr">Турецкий</string>
+    <string name="lang_vi">Вьетнамский</string>
+    <string name="lang_id">Индонезийский</string>
+    <string name="lang_ms">Малайский</string>
+    <string name="lang_tl">Филиппинский</string>
+    <string name="lang_hi">Хинди</string>
+    <string name="lang_th">Тайский</string>
+    <string name="lang_ar">Арабский</string>
+
+    <!-- History -->
+    <string name="title_history">История переводов</string>
+    <string name="filter_all">Все</string>
+    <string name="history_empty">Сохранённых переводов пока нет.\nСфотографируйте текст и нажмите «Сохранить».</string>
+    <string name="delete_entry_title">Удалить этот перевод?</string>
+    <string name="delete_all_title">Удалить всю историю?</string>
+    <string name="delete">Удалить</string>
+    <string name="cancel">Отмена</string>
+    <string name="ok">ОК</string>
+
+    <!-- Settings -->
+    <string name="title_settings">Настройки</string>
+    <string name="setting_ocr_language">Язык OCR</string>
+    <string name="setting_target_language">Язык перевода</string>
+    <string name="setting_auto_replace">Автозамена текста</string>
+    <string name="setting_save_original">Сохранять исходное изображение</string>
+    <string name="setting_models">Офлайн-модели</string>
+    <string name="setting_app_language">Язык приложения</string>
+    <string name="app_language_system">Как в системе</string>
+
+    <!-- Models -->
+    <string name="title_models">Офлайн-модели</string>
+    <string name="models_intro">Распознавание и перевод выполняются полностью на устройстве с помощью файлов моделей из папки ниже. Ничего не загружается из сети. Скопируйте файлы в эту папку с компьютера или импортируйте их из папки на устройстве. Чтобы использовать переобученную модель, замените её файл.</string>
+    <string name="models_group_nllb">Перевод · NLLB-200</string>
+    <string name="model_det">Обнаружение текста</string>
+    <string name="model_rec_fmt">Распознавание «%1$s»</string>
+    <string name="model_encoder">Кодировщик</string>
+    <string name="model_decoder">Декодировщик</string>
+    <string name="model_decoder_with_past">Декодировщик (с кэшем)</string>
+    <string name="model_tokenizer">Токенизатор</string>
+    <string name="model_missing">Не установлено</string>
+    <string name="model_optional">Не установлено (необязательно)</string>
+    <string name="import_models">Импорт из папки…</string>
+    <string name="import_scanning">Поиск файлов моделей…</string>
+    <string name="import_progress_fmt">Копирование %1$s\n%2$s / %3$s</string>
+    <string name="import_done_fmt">Импортировано файлов: %1$d</string>
+    <string name="import_none">В этой папке нет файлов моделей.</string>
+    <string name="import_failed_fmt">Ошибка импорта: %1$s</string>
+    <string name="models_missing_title">Модели не установлены</string>
+    <string name="models_missing_message">Отсутствует: %1$s\n\nПриложение работает офлайн с файлами моделей, которые вы копируете на устройство. Откройте менеджер моделей, чтобы увидеть, что нужно и куда это поместить.</string>
+    <string name="open_model_manager">Менеджер моделей</string>
+    <string name="model_error_title">Ошибка модели</string>
+
+    <!-- About -->
+    <string name="title_about">О приложении</string>
+    <string name="about_version_fmt">Версия %1$s</string>
+    <string name="about_tagline">Снимайте, распознавайте, переводите.\nПреодолейте языковой барьер.</string>
+    <string name="about_terms">Условия использования</string>
+    <string name="about_privacy">Политика конфиденциальности</string>
+    <string name="about_licenses">Лицензии открытого ПО</string>
+    <string name="about_contact">Связаться с нами</string>
+    <string name="no_email_app">Почтовое приложение не найдено.</string>
+
+    <string name="help_text">1. Выберите язык текста (слева) и язык, на который нужно перевести (справа).\n\n2. Нажмите «Сделать снимок» и сфотографируйте текст или выберите изображение из галереи.\n\n3. Перевод рисуется поверх оригинала, на том же месте. Нажмите «Показать оригинал», чтобы сравнить.\n\n4. Нажмите на любой блок текста на изображении или на кнопку «Изменить», чтобы исправить распознанный текст или перевод.\n\n5. Нажмите «Сохранить», чтобы оставить результат в истории.\n\nСоветы: заполните кадр текстом, держите телефон неподвижно и избегайте бликов. Всё работает офлайн с моделями из раздела «Настройки › Офлайн-модели»; первый перевод после запуска приложения занимает на несколько секунд больше, пока загружается модель.</string>
+    <string name="terms_text">SnapTranslate предоставляется «как есть», без каких-либо гарантий. Переводы создаются автоматически моделью на устройстве и могут быть неточными; не полагайтесь на них при принятии медицинских, юридических решений или решений, связанных с безопасностью.</string>
+    <string name="privacy_text">Распознавание текста и перевод выполняются полностью на вашем устройстве. У приложения нет разрешения на доступ в интернет: ваши фотографии, распознанный текст и история не могут покинуть устройство.</string>
+</resources>

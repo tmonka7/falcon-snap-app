@@ -81,7 +81,7 @@ public class ModelsActivity extends BaseActivity {
         ViewGroup ocr = addGroup(R.string.models_group_ocr);
         addRow(ocr, getString(R.string.model_det), ModelStore.detector(this), false);
         for (String key : Language.allOcrKeys()) {
-            String languages = Language.languagesFor(key);
+            String languages = Language.languagesFor(this, key);
             String title = getString(R.string.model_rec_fmt, key) + (languages.isEmpty() ? "" : "  ·  " + languages);
             // Only the main recognizer is needed for the default language pair.
             addRow(ocr, title, ModelStore.recognizer(this, key), !Language.OCR_MAIN.equals(key));
@@ -147,10 +147,10 @@ public class ModelsActivity extends BaseActivity {
                 for (DocumentFile file : files) {
                     copy(appContext, file, target);
                 }
-                message = files.isEmpty() ? appContext.getString(R.string.import_none)
-                        : appContext.getString(R.string.import_done_fmt, files.size());
+                message = files.isEmpty() ? getString(R.string.import_none)
+                        : getString(R.string.import_done_fmt, files.size());
             } catch (IOException | RuntimeException e) {
-                message = appContext.getString(R.string.import_failed_fmt, String.valueOf(e.getMessage()));
+                message = getString(R.string.import_failed_fmt, String.valueOf(e.getMessage()));
             }
             String result = message;
             main.post(() -> {
@@ -202,8 +202,9 @@ public class ModelsActivity extends BaseActivity {
                 copied += read;
                 if (copied >= nextReport) {
                     nextReport = copied + PROGRESS_STEP_BYTES;
-                    String progress = context.getString(R.string.import_progress_fmt, name,
-                            Formatter.formatShortFileSize(context, copied), Formatter.formatShortFileSize(context, total));
+                    // Strings come from the Activity: only it follows the in-app language on older Android versions.
+                    String progress = getString(R.string.import_progress_fmt, name,
+                            Formatter.formatShortFileSize(this, copied), Formatter.formatShortFileSize(this, total));
                     main.post(() -> progressView.setText(progress));
                 }
             }
