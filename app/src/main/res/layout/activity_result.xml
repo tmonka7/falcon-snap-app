@@ -8,7 +8,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/brand_red"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -17,9 +17,7 @@
 
         <ImageButton
             android:id="@+id/top_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            style="@style/IconButton"
             android:contentDescription="@string/cd_back"
             android:src="@drawable/ic_back"
             app:tint="@color/white" />
@@ -32,15 +30,13 @@
             <include
                 layout="@layout/view_language_pill"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="@dimen/language_pill_height"
                 android:layout_gravity="center" />
         </FrameLayout>
 
         <ImageButton
             android:id="@+id/result_gallery"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            style="@style/IconButton"
             android:contentDescription="@string/nav_gallery"
             android:src="@drawable/ic_gallery"
             app:tint="@color/white" />
@@ -61,7 +57,7 @@
         <TextView
             android:id="@+id/compare_toggle"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
+            android:layout_height="@dimen/compare_toggle_height"
             android:layout_gravity="bottom|end"
             android:layout_margin="12dp"
             android:background="@drawable/bg_compare_pill"
@@ -71,7 +67,7 @@
             android:paddingEnd="14dp"
             android:text="@string/show_original"
             android:textColor="@color/white"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:visibility="gone"
             app:drawableStartCompat="@drawable/ic_eye"
             app:drawableTint="@color/white" />
@@ -203,9 +199,7 @@
 
             <ImageButton
                 android:id="@+id/speak_original"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                style="@style/IconButton.Small"
                 android:contentDescription="@string/cd_speak"
                 android:src="@drawable/ic_volume"
                 app:tint="@color/text_secondary" />
@@ -251,9 +245,7 @@
 
             <ImageButton
                 android:id="@+id/speak_translated"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                style="@style/IconButton.Small"
                 android:contentDescription="@string/cd_speak"
                 android:src="@drawable/ic_volume"
                 app:tint="@color/text_secondary" />
@@ -267,23 +259,21 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_edit"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Snap.Button.Outlined"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="@dimen/button_height"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
-                android:text="@string/btn_edit"
-                android:textAllCaps="false"
-                app:strokeColor="@color/brand_red" />
+                android:text="@string/btn_edit" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_save"
+                style="@style/Widget.Snap.Button"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="@dimen/button_height"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
-                android:text="@string/btn_save"
-                android:textAllCaps="false" />
+                android:text="@string/btn_save" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

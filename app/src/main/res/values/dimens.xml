@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Every button size in the app comes from here: change a value to resize that kind of button everywhere. -->
+
+    <!-- Text buttons: Edit, Save, Apply, Import. -->
+    <dimen name="button_height">36dp</dimen>
+    <dimen name="button_text_size">13sp</dimen>
+
+    <!-- Icon buttons in a bar: back, flash, gallery, settings, apply, delete. The icon is size - 2 x padding. -->
+    <dimen name="icon_button_size">40dp</dimen>
+    <dimen name="icon_button_padding">10dp</dimen>
+
+    <!-- Icon buttons inside content: read aloud, clear text, previous / next block. -->
+    <dimen name="icon_button_size_small">34dp</dimen>
+    <dimen name="icon_button_padding_small">8dp</dimen>
+
+    <dimen name="top_bar_height">48dp</dimen>
+
+    <!-- Camera -->
+    <dimen name="shutter_size">64dp</dimen>
+    <dimen name="camera_controls_height">108dp</dimen>
+    <dimen name="camera_control_icon_size">24dp</dimen>
+
+    <!-- The "source ⇄ target" pill, the original / translated toggle, and the history filter chips. -->
+    <dimen name="language_pill_height">32dp</dimen>
+    <dimen name="language_pill_text_size">12sp</dimen>
+    <dimen name="language_pill_swap_size">24dp</dimen>
+    <dimen name="compare_toggle_height">28dp</dimen>
+    <dimen name="chip_padding_horizontal">12dp</dimen>
+    <dimen name="chip_padding_vertical">5dp</dimen>
+    <dimen name="chip_text_size">11sp</dimen>
+</resources>

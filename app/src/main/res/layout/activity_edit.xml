@@ -40,9 +40,7 @@
 
                 <ImageButton
                     android:id="@+id/block_prev"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    style="@style/IconButton.Small"
                     android:contentDescription="@string/cd_previous"
                     android:rotation="180"
                     android:src="@drawable/ic_chevron_right"
@@ -59,9 +57,7 @@
 
                 <ImageButton
                     android:id="@+id/block_next"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    style="@style/IconButton.Small"
                     android:contentDescription="@string/cd_next"
                     android:src="@drawable/ic_chevron_right"
                     app:tint="@color/brand_red" />
@@ -96,11 +92,8 @@
 
                 <ImageButton
                     android:id="@+id/clear_original"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    style="@style/IconButton.Small"
                     android:contentDescription="@string/cd_clear"
-                    android:padding="10dp"
                     android:src="@drawable/ic_close"
                     app:tint="@color/text_secondary" />
             </LinearLayout>
@@ -134,11 +127,8 @@
 
                 <ImageButton
                     android:id="@+id/clear_translated"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    style="@style/IconButton.Small"
                     android:contentDescription="@string/cd_clear"
-                    android:padding="10dp"
                     android:src="@drawable/ic_close"
                     app:tint="@color/text_secondary" />
             </LinearLayout>
@@ -146,7 +136,7 @@
             <LinearLayout
                 android:id="@+id/lang_bar"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="@dimen/button_height"
                 android:layout_marginTop="20dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
@@ -164,11 +154,11 @@
 
                 <ImageView
                     android:id="@+id/lang_swap"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
+                    android:layout_width="@dimen/icon_button_size"
+                    android:layout_height="@dimen/button_height"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/cd_swap"
-                    android:padding="11dp"
+                    android:padding="9dp"
                     android:src="@drawable/ic_swap"
                     app:tint="@color/brand_red" />
 
@@ -186,12 +176,11 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_apply"
+                style="@style/Widget.Snap.Button"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="@dimen/button_height"
                 android:layout_marginTop="16dp"
-                android:text="@string/btn_apply"
-                android:textAllCaps="false"
-                android:textSize="15sp" />
+                android:text="@string/btn_apply" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

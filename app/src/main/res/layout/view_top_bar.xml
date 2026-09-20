@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/top_bar"
     android:layout_width="match_parent"
-    android:layout_height="56dp"
+    android:layout_height="@dimen/top_bar_height"
     android:background="@color/brand_red"
     android:gravity="center_vertical"
     android:orientation="horizontal"
@@ -12,9 +12,7 @@
 
     <ImageButton
         android:id="@+id/top_back"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        style="@style/IconButton"
         android:contentDescription="@string/cd_back"
         android:src="@drawable/ic_back"
         app:tint="@color/white" />
@@ -47,9 +45,7 @@
 
     <ImageButton
         android:id="@+id/top_action"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        style="@style/IconButton"
         android:visibility="gone"
         app:tint="@color/white" />
 </LinearLayout>

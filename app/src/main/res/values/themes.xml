@@ -20,6 +20,46 @@
         <item name="android:statusBarColor">@color/black</item>
     </style>
 
+    <!--
+        Compact buttons. Sizes live in dimens.xml. Material's default button reserves 6dp of empty
+        inset above and below the visible shape; without it, layout_height is the height you see.
+    -->
+    <style name="Widget.Snap.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:minHeight">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:textSize">@dimen/button_text_size</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="Widget.Snap.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:minHeight">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:textSize">@dimen/button_text_size</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="strokeColor">@color/brand_red</item>
+    </style>
+
+    <!-- Icon-only buttons. The icon is scaled to the button size minus the padding. -->
+    <style name="IconButton">
+        <item name="android:layout_width">@dimen/icon_button_size</item>
+        <item name="android:layout_height">@dimen/icon_button_size</item>
+        <item name="android:padding">@dimen/icon_button_padding</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+    </style>
+
+    <style name="IconButton.Small">
+        <item name="android:layout_width">@dimen/icon_button_size_small</item>
+        <item name="android:layout_height">@dimen/icon_button_size_small</item>
+        <item name="android:padding">@dimen/icon_button_padding_small</item>
+    </style>
+
     <style name="SectionLabel">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.LruCache;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -147,16 +148,17 @@ public class HistoryActivity extends BaseActivity {
 
     private void addChip(String label, @Nullable String key) {
         boolean selected = key == null ? filter == null : key.equals(filter);
-        float density = getResources().getDisplayMetrics().density;
+        int horizontal = getResources().getDimensionPixelSize(R.dimen.chip_padding_horizontal);
+        int vertical = getResources().getDimensionPixelSize(R.dimen.chip_padding_vertical);
         TextView chip = new TextView(this);
         chip.setText(label);
-        chip.setTextSize(12);
+        chip.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.chip_text_size));
         chip.setTextColor(ContextCompat.getColor(this, selected ? R.color.white : R.color.text_primary));
         chip.setBackgroundResource(selected ? R.drawable.bg_chip_selected : R.drawable.bg_chip);
-        chip.setPadding((int) (16 * density), (int) (7 * density), (int) (16 * density), (int) (7 * density));
+        chip.setPadding(horizontal, vertical, horizontal, vertical);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMarginEnd((int) (8 * density));
+        params.setMarginEnd(vertical + horizontal / 2);
         chip.setOnClickListener(v -> {
             filter = key;
             buildChips();

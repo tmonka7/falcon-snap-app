@@ -8,7 +8,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/camera_bar"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -17,18 +17,14 @@
 
         <ImageButton
             android:id="@+id/cam_back"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            style="@style/IconButton"
             android:contentDescription="@string/cd_back"
             android:src="@drawable/ic_back"
             app:tint="@color/white" />
 
         <ImageButton
             android:id="@+id/cam_flash"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            style="@style/IconButton"
             android:contentDescription="@string/cd_flash"
             android:src="@drawable/ic_flash_off"
             app:tint="@color/white" />
@@ -41,16 +37,14 @@
             <include
                 layout="@layout/view_language_pill"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="@dimen/language_pill_height"
                 android:layout_gravity="center" />
         </FrameLayout>
 
         <ImageButton
             android:id="@+id/cam_gallery_top"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:layout_marginStart="44dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            style="@style/IconButton"
+            android:layout_marginStart="@dimen/icon_button_size"
             android:contentDescription="@string/nav_gallery"
             android:src="@drawable/ic_gallery"
             app:tint="@color/white" />
@@ -84,7 +78,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="128dp"
+        android:layout_height="@dimen/camera_controls_height"
         android:background="@color/camera_bar"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -99,8 +93,8 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="@dimen/camera_control_icon_size"
+                android:layout_height="@dimen/camera_control_icon_size"
                 android:importantForAccessibility="no"
                 android:src="@drawable/ic_gallery"
                 app:tint="@color/white" />
@@ -116,8 +110,8 @@
 
         <ImageButton
             android:id="@+id/cam_shutter"
-            android:layout_width="76dp"
-            android:layout_height="76dp"
+            android:layout_width="@dimen/shutter_size"
+            android:layout_height="@dimen/shutter_size"
             android:background="@drawable/bg_shutter"
             android:contentDescription="@string/cd_shutter" />
 
@@ -131,8 +125,8 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="@dimen/camera_control_icon_size"
+                android:layout_height="@dimen/camera_control_icon_size"
                 android:importantForAccessibility="no"
                 android:src="@drawable/ic_flip"
                 app:tint="@color/white" />

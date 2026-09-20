@@ -45,12 +45,11 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_import_models"
+                style="@style/Widget.Snap.Button"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="@dimen/button_height"
                 android:layout_marginTop="8dp"
-                android:text="@string/import_models"
-                android:textAllCaps="false"
-                android:textSize="15sp" />
+                android:text="@string/import_models" />
 
             <TextView
                 android:id="@+id/import_progress"
