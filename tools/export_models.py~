@@ -1,0 +1,198 @@
+#!/usr/bin/env python3
+"""Builds the model folder that the SnapTranslate app loads from storage.
+
+Output (copy the whole folder to the device, see MODELS.md):
+
+    models/ocr/det.onnx                  PP-OCRv5 text detection
+    models/ocr/rec_<key>.onnx + .txt     PP-OCRv5 text recognition + character dictionary
+    models/nllb/encoder_model*.onnx      NLLB-200 encoder
+    models/nllb/decoder_model_merged*.onnx
+    models/nllb/tokenizer.json
+
+Typical use:
+
+    # everything from the public checkpoints (int8 NLLB, ~0.9 GB)
+    python tools/export_models.py --ocr main latin eslav --nllb prebuilt
+
+    # after retraining: point at your own checkpoints instead
+    python tools/export_models.py --ocr-rec main=./my_rec_infer --nllb ./my-finetuned-nllb
+
+Requirements (install them into the SAME Python that runs this script: "python -m pip ..."):
+    python -m pip install huggingface_hub pyyaml
+    OCR conversion:  python -m pip install paddlepaddle paddlex
+                     python -m paddlex --install paddle2onnx
+    NLLB export:     python -m pip install "optimum[onnxruntime]" onnxruntime   (not needed for --nllb prebuilt)
+The script checks for these up front and tells you what is missing.
+"""
+import argparse
+import importlib.util
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+try:
+    import yaml
+    from huggingface_hub import hf_hub_download, snapshot_download
+except ImportError as e:
+    sys.exit(f'Missing Python package "{e.name}". Install it into this interpreter:\n'
+             f'    "{sys.executable}" -m pip install huggingface_hub pyyaml')
+
+# App recognizer key -> official PP-OCRv5 recognition model (https://huggingface.co/PaddlePaddle).
+# The keys are the ones in app/src/main/java/com/falcon/snap/model/Language.java.
+OCR_REC_MODELS = {
+    "main": "PP-OCRv5_mobile_rec",  # Chinese, English, Japanese
+    "latin": "latin_PP-OCRv5_mobile_rec",
+    "eslav": "eslav_PP-OCRv5_mobile_rec",  # Russian, Ukrainian, Belarusian
+    "cyrillic": "cyrillic_PP-OCRv5_mobile_rec",
+    "th": "th_PP-OCRv5_mobile_rec",
+    "arabic": "arabic_PP-OCRv5_mobile_rec",
+    "devanagari": "devanagari_PP-OCRv5_mobile_rec",
+}
+OCR_DET_MODEL = "PP-OCRv5_mobile_det"  # PP-OCRv5_server_det also works, it is just slower
+
+NLLB_PREBUILT_REPO = "Xenova/nllb-200-distilled-600M"  # ONNX export of facebook/nllb-200-distilled-600M
+NLLB_PREBUILT_FILES = {
+    "onnx/encoder_model_quantized.onnx": "encoder_model_quantized.onnx",
+    "onnx/decoder_model_merged_quantized.onnx": "decoder_model_merged_quantized.onnx",
+    "tokenizer.json": "tokenizer.json",
+}
+
+
+def run(*command):
+    print("+", " ".join(str(c) for c in command), flush=True)
+    subprocess.run([str(c) for c in command], check=True)
+
+
+def require(modules, purpose, install_steps):
+    """Stops with install instructions if a needed package is missing, before anything is downloaded."""
+    missing = [m for m in modules if importlib.util.find_spec(m) is None]
+    if not missing:
+        return
+    python = f'"{sys.executable}"'
+    lines = [f"\nCannot do the {purpose}: missing Python package(s): {', '.join(missing)}",
+             f"This script is running under {sys.executable}; install into that interpreter:\n"]
+    # Steps that start with "-m" are commands for this interpreter; anything else is a note.
+    lines += [f"    {python} {step}" if step.startswith("-m") else f"    {step}" for step in install_steps]
+    sys.exit("\n".join(lines) + "\n")
+
+
+def check_requirements(args):
+    if args.ocr or args.ocr_rec:
+        require(["paddle", "paddlex", "paddle2onnx"], "OCR conversion (Paddle -> ONNX)", [
+            "-m pip install paddlepaddle paddlex",
+            "-m paddlex --install paddle2onnx",
+            "",
+            "# Windows: if the conversion itself then fails, PaddleX's docs say to use the nightly CPU build:",
+            "-m pip install --pre paddlepaddle -i https://www.paddlepaddle.org.cn/packages/nightly/cpu/",
+        ])
+    if args.nllb and args.nllb != "prebuilt":
+        require(["optimum", "onnxruntime"], "NLLB export", ['-m pip install "optimum[onnxruntime]" onnxruntime'])
+
+
+def paddle_to_onnx(model_dir: Path, target: Path, work: Path):
+    """model_dir holds a Paddle inference model: inference.json / inference.pdiparams / inference.yml."""
+    out_dir = work / (target.stem + "_onnx")
+    # "python -m paddlex" rather than the "paddlex" command: same interpreter, and no PATH surprises.
+    run(sys.executable, "-m", "paddlex", "--paddle2onnx", "--paddle_model_dir", model_dir,
+        "--onnx_model_dir", out_dir, "--opset_version", "7")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(out_dir / "inference.onnx", target)
+    print("wrote", target)
+
+
+def write_dictionary(model_dir: Path, target: Path):
+    """The recognizer's character list lives in inference.yml; the app wants one character per line."""
+    config = yaml.safe_load((model_dir / "inference.yml").read_text(encoding="utf-8"))
+    characters = config["PostProcess"]["character_dict"]
+    # newline="\n": the app must not see "\r"; do not strip, some entries are whitespace characters.
+    with open(target, "w", encoding="utf-8", newline="\n") as f:
+        for character in characters:
+            f.write(f"{character}\n")
+    print("wrote", target, f"({len(characters)} characters)")
+
+
+def resolve_paddle_model(spec: str) -> Path:
+    """A local inference-model folder, or the name of a PaddlePaddle repo on the Hugging Face hub."""
+    if Path(spec).is_dir():
+        return Path(spec)
+    return Path(snapshot_download(f"PaddlePaddle/{spec}"))
+
+
+def export_ocr(args, out: Path, work: Path):
+    ocr = out / "ocr"
+    if not args.skip_det:
+        paddle_to_onnx(resolve_paddle_model(args.ocr_det), ocr / "det.onnx", work)
+    recognizers = {key: OCR_REC_MODELS[key] for key in args.ocr}
+    for item in args.ocr_rec:  # key=path overrides, e.g. a retrained recognizer
+        key, _, spec = item.partition("=")
+        recognizers[key] = spec
+    for key, spec in recognizers.items():
+        model_dir = resolve_paddle_model(spec)
+        paddle_to_onnx(model_dir, ocr / f"rec_{key}.onnx", work)
+        write_dictionary(model_dir, ocr / f"rec_{key}.txt")
+
+
+def quantize_int8(source: Path, target: Path):
+    from onnxruntime.quantization import QuantType, quantize_dynamic
+
+    # EnableSubgraph: the merged decoder keeps its two branches inside an If node.
+    quantize_dynamic(str(source), str(target), weight_type=QuantType.QInt8, per_channel=False,
+                     reduce_range=False, extra_options={"EnableSubgraph": True})
+    print("wrote", target)
+
+
+def export_nllb(args, out: Path, work: Path):
+    nllb = out / "nllb"
+    nllb.mkdir(parents=True, exist_ok=True)
+    if args.nllb == "prebuilt":
+        for remote, local in NLLB_PREBUILT_FILES.items():
+            shutil.copyfile(hf_hub_download(NLLB_PREBUILT_REPO, remote), nllb / local)
+            print("wrote", nllb / local)
+        return
+
+    # A local fine-tuned checkpoint, or a hub id such as facebook/nllb-200-distilled-600M.
+    export_dir = work / "nllb_onnx"
+    run(sys.executable, "-m", "optimum.commands.optimum_cli", "export", "onnx", "--model", args.nllb,
+        "--task", "text2text-generation-with-past", export_dir)
+    shutil.copyfile(export_dir / "tokenizer.json", nllb / "tokenizer.json")
+    for name in ("encoder_model", "decoder_model_merged"):
+        if args.no_quantize:
+            # fp32 models above 2 GB keep their weights in a side file that must travel with them.
+            for file in export_dir.glob(f"{name}.onnx*"):
+                shutil.copyfile(file, nllb / file.name)
+        else:
+            quantize_int8(export_dir / f"{name}.onnx", nllb / f"{name}_quantized.onnx")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--out", default="models", help="output folder (default: ./models)")
+    parser.add_argument("--ocr", nargs="*", default=[], choices=sorted(OCR_REC_MODELS), metavar="KEY",
+                        help="official recognizers to convert: " + ", ".join(sorted(OCR_REC_MODELS)))
+    parser.add_argument("--ocr-rec", nargs="*", default=[], metavar="KEY=DIR",
+                        help="your own recognizer: Paddle inference-model folder to install as rec_KEY")
+    parser.add_argument("--ocr-det", default=OCR_DET_MODEL, help="detector: repo name or inference-model folder")
+    parser.add_argument("--skip-det", action="store_true", help="do not (re)convert the detector")
+    parser.add_argument("--nllb", help="'prebuilt', a hub id, or the folder of a fine-tuned checkpoint")
+    parser.add_argument("--no-quantize", action="store_true", help="keep NLLB in fp32 (about 4x larger)")
+    args = parser.parse_args()
+    check_requirements(args)
+
+    out = Path(args.out)
+    work = out / ".work"
+    work.mkdir(parents=True, exist_ok=True)
+    if args.ocr or args.ocr_rec:
+        export_ocr(args, out, work)
+    if args.nllb:
+        export_nllb(args, out, work)
+    shutil.rmtree(work, ignore_errors=True)
+
+    print("\nDone. Install on a connected device with:")
+    print(f"  adb shell mkdir -p /sdcard/Android/data/com.falcon.snap/files/models")
+    print(f"  adb push {out}/. /sdcard/Android/data/com.falcon.snap/files/models/")
+    print("or copy the folder to the phone and use Settings > Offline Models > Import from folder.")
+    
+
+if __name__ == "__main__":
+    sys.exit(main())
