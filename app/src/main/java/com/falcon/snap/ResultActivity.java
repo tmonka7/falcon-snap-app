@@ -27,12 +27,14 @@ import androidx.core.widget.ImageViewCompat;
 import com.falcon.snap.data.HistoryDb;
 import com.falcon.snap.data.HistoryEntry;
 import com.falcon.snap.engine.BitmapUtils;
+import com.falcon.snap.engine.ModelsMissingException;
 import com.falcon.snap.engine.OcrEngine;
 import com.falcon.snap.engine.OverlayRenderer;
 import com.falcon.snap.engine.TranslatorEngine;
 import com.falcon.snap.model.Language;
 import com.falcon.snap.model.TextBlockItem;
 import com.falcon.snap.ui.BlockImageView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,6 +77,8 @@ public class ResultActivity extends BaseActivity {
     private int runId;
     private boolean processing;
     private boolean showingTranslated = true;
+    /** Failure of the current run, shown to the user once the result sheet is visible. */
+    private Exception pendingError;
 
     private String sourceBeforeEdit;
     private String targetBeforeEdit;
@@ -216,7 +220,7 @@ public class ResultActivity extends BaseActivity {
 
     private void runOcr(int run) {
         showProcessing(R.string.processing_extracting);
-        OcrEngine.recognize(Session.original, Session.source, new OcrEngine.Callback() {
+        OcrEngine.recognize(this, Session.original, Session.source, new OcrEngine.Callback() {
             @Override
             public void onSuccess(List<TextBlockItem> blocks) {
                 if (isStale(run)) {
@@ -234,7 +238,8 @@ public class ResultActivity extends BaseActivity {
             public void onError(Exception e) {
                 if (!isStale(run)) {
                     Session.blocks = new ArrayList<>();
-                    showResult(R.string.status_no_text);
+                    pendingError = e;
+                    showResult(R.string.status_ocr_failed);
                 }
             }
         });
@@ -243,11 +248,18 @@ public class ResultActivity extends BaseActivity {
     /** @param all re-translate every block (language changed) rather than only the untranslated ones */
     private void runTranslate(int run, boolean all) {
         showProcessing(R.string.processing_translating);
-        TranslatorEngine.translate(Session.blocks, Session.source, Session.target, all, new TranslatorEngine.Callback() {
+        TranslatorEngine.translate(this, Session.blocks, Session.source, Session.target, all, new TranslatorEngine.Callback() {
             @Override
-            public void onDownloadingModel() {
+            public void onLoadingModel() {
                 if (!isStale(run)) {
-                    processingText.setText(R.string.processing_downloading);
+                    processingText.setText(R.string.processing_loading_model);
+                }
+            }
+
+            @Override
+            public void onProgress(int done, int total) {
+                if (!isStale(run)) {
+                    processingText.setText(getString(R.string.processing_translating_fmt, done, total));
                 }
             }
 
@@ -261,6 +273,8 @@ public class ResultActivity extends BaseActivity {
             @Override
             public void onError(Exception e) {
                 if (!isStale(run)) {
+                    // Still show the recognized text; the reason is reported once the screen is up.
+                    pendingError = e;
                     render(run, R.string.status_failed);
                 }
             }
@@ -333,6 +347,32 @@ public class ResultActivity extends BaseActivity {
         saveButton.setEnabled(hasText && Session.rendered != null);
         imageView.setBlocks(Session.canEdit() ? Session.blocks : new ArrayList<>());
         updateImage();
+        reportPendingError();
+    }
+
+    /** Explains an OCR / translation failure. Missing models get a shortcut to the model manager. */
+    private void reportPendingError() {
+        Exception error = pendingError;
+        pendingError = null;
+        if (error == null) {
+            return;
+        }
+        if (error instanceof ModelsMissingException) {
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.models_missing_title)
+                    .setMessage(getString(R.string.models_missing_message, error.getMessage()))
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.open_model_manager,
+                            (dialog, which) -> startActivity(new Intent(this, ModelsActivity.class)))
+                    .show();
+        } else {
+            // Models are user-supplied and may be retrained, so show the real reason, not a generic apology.
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.model_error_title)
+                    .setMessage(String.valueOf(error.getMessage() != null ? error.getMessage() : error))
+                    .setPositiveButton(R.string.ok, null)
+                    .show();
+        }
     }
 
     /** Shows the replaced or the untouched photo, and the toggle between them when both exist. */

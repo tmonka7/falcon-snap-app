@@ -42,11 +42,13 @@
     <string name="processing_loading">Loading image…</string>
     <string name="processing_extracting">Extracting text…</string>
     <string name="processing_translating">Translating…</string>
-    <string name="processing_downloading">Downloading language model…\n(first time only)</string>
+    <string name="processing_loading_model">Loading translation model…\n(a few seconds, first use only)</string>
+    <string name="processing_translating_fmt">Translating… %1$d / %2$d</string>
     <string name="processing_rendering">Replacing text…</string>
     <string name="status_completed">Translation completed!</string>
     <string name="status_no_text">No text found in this image</string>
-    <string name="status_failed">Translation failed. Check your connection — language models are downloaded on first use.</string>
+    <string name="status_failed">Translation failed</string>
+    <string name="status_ocr_failed">Text recognition failed</string>
     <string name="status_load_failed">Could not open this image.</string>
     <string name="label_original_fmt">%1$s (Original)</string>
     <string name="label_translated_fmt">%1$s (Translated)</string>
@@ -74,7 +76,7 @@
     <string name="search_language_hint">Search language…</string>
     <string name="recent_languages">Recent Languages</string>
     <string name="all_languages">All Languages</string>
-    <string name="source_not_supported">%1$s can only be a target language (text recognition is not available for it).</string>
+    <string name="ocr_model_missing">OCR model not installed</string>
 
     <!-- History -->
     <string name="title_history">Translation History</string>
@@ -92,6 +94,31 @@
     <string name="setting_target_language">Target Language</string>
     <string name="setting_auto_replace">Auto Replace Text</string>
     <string name="setting_save_original">Save Original Image</string>
+    <string name="setting_models">Offline Models</string>
+
+    <!-- Models -->
+    <string name="title_models">Offline Models</string>
+    <string name="models_intro">OCR and translation run entirely on this device, using the model files in the folder below. Nothing is downloaded. Copy the files there from a computer, or import them from a folder on this device. To use a retrained model, replace its file.</string>
+    <string name="models_group_ocr">OCR · PaddleOCR PP-OCRv5</string>
+    <string name="models_group_nllb">Translation · NLLB-200</string>
+    <string name="model_det">Text detection</string>
+    <string name="model_rec_fmt">Recognition “%1$s”</string>
+    <string name="model_encoder">Encoder</string>
+    <string name="model_decoder">Decoder</string>
+    <string name="model_decoder_with_past">Decoder (with cache)</string>
+    <string name="model_tokenizer">Tokenizer</string>
+    <string name="model_missing">Not installed</string>
+    <string name="model_optional">Not installed (optional)</string>
+    <string name="import_models">Import from folder…</string>
+    <string name="import_scanning">Looking for model files…</string>
+    <string name="import_progress_fmt">Copying %1$s\n%2$s / %3$s</string>
+    <string name="import_done_fmt">Imported %1$d files</string>
+    <string name="import_none">No model files found in that folder.</string>
+    <string name="import_failed_fmt">Import failed: %1$s</string>
+    <string name="models_missing_title">Models not installed</string>
+    <string name="models_missing_message">Missing: %1$s\n\nThis app works offline with model files that you copy to the device. Open the model manager to see what is needed and where it goes.</string>
+    <string name="open_model_manager">Model manager</string>
+    <string name="model_error_title">Model error</string>
 
     <!-- About -->
     <string name="title_about">About</string>
@@ -105,8 +132,8 @@
     <string name="contact_email">support@example.com</string>
     <string name="no_email_app">No email app found.</string>
 
-    <string name="help_text">1. Choose the language of the text (left) and the language you want (right).\n\n2. Tap Capture and photograph the text, or pick an image from the gallery.\n\n3. The translated text is drawn over the original, in the same place. Use \"Show original\" to compare.\n\n4. Tap any text block on the image — or the Edit button — to correct the recognized text or the translation.\n\n5. Tap Save to keep the result in History.\n\nTips: fill the frame with the text, hold steady, and avoid glare. The first translation for a new language downloads a small language model; after that everything works offline.</string>
+    <string name="help_text">1. Choose the language of the text (left) and the language you want (right).\n\n2. Tap Capture and photograph the text, or pick an image from the gallery.\n\n3. The translated text is drawn over the original, in the same place. Use \"Show original\" to compare.\n\n4. Tap any text block on the image — or the Edit button — to correct the recognized text or the translation.\n\n5. Tap Save to keep the result in History.\n\nTips: fill the frame with the text, hold steady, and avoid glare. Everything runs offline with the models listed under Settings › Offline Models; the first translation after opening the app takes a few extra seconds while the model loads.</string>
     <string name="terms_text">SnapTranslate is provided \"as is\", without warranty of any kind. Translations are produced automatically by an on-device model and may be inaccurate; do not rely on them for medical, legal or safety-critical decisions.</string>
-    <string name="privacy_text">Text recognition and translation run entirely on your device. Your photos, the recognized text and your history never leave the device. The app uses the network only to download translation language models from Google.</string>
-    <string name="licenses_text">AndroidX, CameraX and Material Components for Android — Apache License 2.0\n\nGoogle ML Kit (Text Recognition, Translation) — ML Kit Terms of Service\n\nMaterial Icons — Apache License 2.0</string>
+    <string name="privacy_text">Text recognition and translation run entirely on your device. The app has no internet permission: your photos, the recognized text and your history cannot leave the device.</string>
+    <string name="licenses_text">AndroidX, CameraX and Material Components for Android — Apache License 2.0\n\nONNX Runtime — MIT License\n\nPaddleOCR PP-OCRv5 models — Apache License 2.0\n\nNLLB-200 model (Meta AI) — CC-BY-NC 4.0, non-commercial use only\n\nMaterial Icons — Apache License 2.0</string>
 </resources>

@@ -34,6 +34,9 @@ public class SettingsActivity extends BaseActivity {
         addSwitch(behavior, R.string.setting_save_original, prefs.saveOriginal(),
                 (button, checked) -> prefs.setSaveOriginal(checked));
 
+        ViewGroup models = SettingRows.addGroup(this, container);
+        SettingRows.addRow(this, models, R.string.setting_models, v -> startActivity(new Intent(this, ModelsActivity.class)));
+
         ViewGroup more = SettingRows.addGroup(this, container);
         SettingRows.addRow(this, more, R.string.nav_help, v -> Dialogs.showHelp(this));
         SettingRows.addRow(this, more, R.string.nav_about, v -> startActivity(new Intent(this, AboutActivity.class)));

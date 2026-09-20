@@ -9,6 +9,7 @@
     <color name="text_primary">#1E2330</color>
     <color name="text_secondary">#6F7685</color>
     <color name="divider">#E6E8EC</color>
+    <color name="status_ok">#2E9E5B</color>
 
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>

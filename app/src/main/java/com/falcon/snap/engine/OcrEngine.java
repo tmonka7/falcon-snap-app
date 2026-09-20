@@ -1,24 +1,15 @@
 package com.falcon.snap.engine;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 
 import com.falcon.snap.model.Language;
 import com.falcon.snap.model.TextBlockItem;
-import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.text.Text;
-import com.google.mlkit.vision.text.TextRecognition;
-import com.google.mlkit.vision.text.TextRecognizer;
-import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions;
-import com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions;
-import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions;
-import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions;
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,158 +17,57 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Runs ML Kit text recognition and turns each recognized block into a {@link TextBlockItem}:
- * its rotated rectangle, its text, and the background / text colors sampled from the photo.
+ * Offline OCR. Runs PaddleOCR PP-OCRv5 ({@link PaddleOcr}) with the models found by
+ * {@link ModelStore}, groups the lines into paragraphs ({@link LineGrouper}) and samples the
+ * background / text colors needed to paint a translation over each block.
  */
 public final class OcrEngine {
     public interface Callback {
         void onSuccess(List<TextBlockItem> blocks);
 
+        /** A {@link ModelsMissingException} means the OCR models are not installed. */
         void onError(Exception e);
     }
 
     private static final ExecutorService WORKER = Executors.newSingleThreadExecutor();
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
+    /** Only touched on WORKER. */
+    private static final PaddleOcr OCR = new PaddleOcr();
 
     private OcrEngine() {
     }
 
     /** Callbacks are delivered on the main thread. */
-    public static void recognize(Bitmap bitmap, Language source, Callback callback) {
-        TextRecognizer recognizer = createRecognizer(source.script);
-        recognizer.process(InputImage.fromBitmap(bitmap, 0))
-                .addOnSuccessListener(text -> {
-                    recognizer.close();
-                    // Color sampling reads a few thousand pixels per block; keep it off the UI thread.
-                    WORKER.execute(() -> {
-                        List<TextBlockItem> blocks = toBlocks(text, bitmap, source);
-                        MAIN.post(() -> callback.onSuccess(blocks));
-                    });
-                })
-                .addOnFailureListener(e -> {
-                    recognizer.close();
-                    callback.onError(e);
-                });
-    }
-
-    private static TextRecognizer createRecognizer(int script) {
-        switch (script) {
-            case Language.SCRIPT_CHINESE:
-                return TextRecognition.getClient(new ChineseTextRecognizerOptions.Builder().build());
-            case Language.SCRIPT_JAPANESE:
-                return TextRecognition.getClient(new JapaneseTextRecognizerOptions.Builder().build());
-            case Language.SCRIPT_KOREAN:
-                return TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
-            case Language.SCRIPT_DEVANAGARI:
-                return TextRecognition.getClient(new DevanagariTextRecognizerOptions.Builder().build());
-            default:
-                return TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
-        }
-    }
-
-    private static List<TextBlockItem> toBlocks(Text text, Bitmap bitmap, Language source) {
-        List<TextBlockItem> blocks = new ArrayList<>();
-        for (Text.TextBlock block : text.getTextBlocks()) {
-            List<Text.Line> lines = block.getLines();
-            float[] corners = cornersOf(block.getCornerPoints(), block.getBoundingBox());
-            if (lines.isEmpty() || corners == null) {
-                continue;
-            }
-            TextBlockItem item = new TextBlockItem();
-            item.corners = corners;
-            item.cx = (corners[0] + corners[2] + corners[4] + corners[6]) / 4f;
-            item.cy = (corners[1] + corners[3] + corners[5] + corners[7]) / 4f;
-            item.w = (dist(corners, 0, 1) + dist(corners, 3, 2)) / 2f;
-            item.h = (dist(corners, 0, 3) + dist(corners, 1, 2)) / 2f;
-            if (item.w < 4f || item.h < 4f) {
-                continue;
-            }
-            item.angle = (float) Math.toDegrees(Math.atan2(corners[3] - corners[1], corners[2] - corners[0]));
-            item.lineCount = lines.size();
-            measureLines(item, lines);
-            item.sourceText = joinLines(lines, source);
-            int[] colors = sampleColors(bitmap, corners, item);
-            item.bgColor = colors[0];
-            item.textColor = colors[1];
-            blocks.add(item);
-        }
-        return blocks;
-    }
-
-    /** Returns the quad as x0,y0 .. x3,y3 (tl, tr, br, bl), or null when ML Kit gave no geometry. */
-    private static float[] cornersOf(Point[] points, Rect box) {
-        if (points != null && points.length == 4) {
-            float[] corners = new float[8];
-            for (int i = 0; i < 4; i++) {
-                corners[i * 2] = points[i].x;
-                corners[i * 2 + 1] = points[i].y;
-            }
-            return corners;
-        }
-        if (box != null) {
-            return new float[]{box.left, box.top, box.right, box.top, box.right, box.bottom, box.left, box.bottom};
-        }
-        return null;
-    }
-
-    private static float dist(float[] corners, int a, int b) {
-        return (float) Math.hypot(corners[b * 2] - corners[a * 2], corners[b * 2 + 1] - corners[a * 2 + 1]);
-    }
-
-    /** Fills in the average line height and whether the lines look center-aligned. */
-    private static void measureLines(TextBlockItem item, List<Text.Line> lines) {
-        // Unit vector along the block's baseline; line edges are projected onto it.
-        float ux = (item.corners[2] - item.corners[0]) / item.w;
-        float uy = (item.corners[3] - item.corners[1]) / item.w;
-        float heightSum = 0f;
-        int measured = 0;
-        float minLeft = Float.MAX_VALUE, maxLeft = -Float.MAX_VALUE;
-        float minCenter = Float.MAX_VALUE, maxCenter = -Float.MAX_VALUE;
-        for (Text.Line line : lines) {
-            float[] c = cornersOf(line.getCornerPoints(), line.getBoundingBox());
-            if (c == null) {
-                continue;
-            }
-            heightSum += (dist(c, 0, 3) + dist(c, 1, 2)) / 2f;
-            measured++;
-            float left = (c[0] - item.corners[0]) * ux + (c[1] - item.corners[1]) * uy;
-            float right = (c[2] - item.corners[0]) * ux + (c[3] - item.corners[1]) * uy;
-            float center = (left + right) / 2f;
-            minLeft = Math.min(minLeft, left);
-            maxLeft = Math.max(maxLeft, left);
-            minCenter = Math.min(minCenter, center);
-            maxCenter = Math.max(maxCenter, center);
-        }
-        item.lineHeight = measured > 0 ? heightSum / measured : item.h / Math.max(1, item.lineCount);
-        if (measured <= 1) {
-            item.centered = true;
-        } else {
-            float leftSpread = maxLeft - minLeft;
-            float centerSpread = maxCenter - minCenter;
-            // Ragged left edges that share a common center = centered text.
-            item.centered = leftSpread > item.lineHeight * 0.3f && centerSpread < leftSpread * 0.5f;
-        }
-    }
-
-    /** Rebuilds a block's sentence(s) from its lines so the translator sees whole phrases. */
-    private static String joinLines(List<Text.Line> lines, Language source) {
-        StringBuilder sb = new StringBuilder();
-        for (Text.Line line : lines) {
-            String text = line.getText().trim();
-            if (text.isEmpty()) {
-                continue;
-            }
-            if (sb.length() > 0) {
-                boolean hyphenated = sb.charAt(sb.length() - 1) == '-' && Character.isLowerCase(text.charAt(0));
-                if (hyphenated) {
-                    sb.setLength(sb.length() - 1);
-                } else if (!source.joinsWithoutSpaces()) {
-                    sb.append(' ');
+    public static void recognize(Context context, Bitmap bitmap, Language source, Callback callback) {
+        Context appContext = context.getApplicationContext();
+        WORKER.execute(() -> {
+            try {
+                File detector = ModelStore.detector(appContext);
+                String key = ModelStore.recognizerKeyFor(appContext, source);
+                if (detector == null || key == null) {
+                    throw new ModelsMissingException(detector == null
+                            ? "ocr/" + ModelStore.OCR_DET
+                            : "ocr/rec_" + source.ocrKeys[0] + ".onnx");
                 }
+                List<PaddleOcr.Line> lines = OCR.run(bitmap, detector,
+                        ModelStore.recognizer(appContext, key), ModelStore.dictionary(appContext, key));
+                List<TextBlockItem> blocks = LineGrouper.group(lines, source);
+                for (TextBlockItem block : blocks) {
+                    int[] colors = sampleColors(bitmap, block.corners, block);
+                    block.bgColor = colors[0];
+                    block.textColor = colors[1];
+                }
+                MAIN.post(() -> callback.onSuccess(blocks));
+            } catch (Exception | OutOfMemoryError e) {
+                Exception error = e instanceof Exception ? (Exception) e : new RuntimeException(e);
+                MAIN.post(() -> callback.onError(error));
             }
-            sb.append(text);
-        }
-        return sb.toString();
+        });
+    }
+
+    /** Frees the OCR sessions (a few tens of MB). They are reloaded on the next use. */
+    public static void release() {
+        WORKER.execute(OCR::release);
     }
 
     /**

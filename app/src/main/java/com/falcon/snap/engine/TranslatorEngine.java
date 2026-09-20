@@ -1,32 +1,42 @@
 package com.falcon.snap.engine;
 
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+
 import com.falcon.snap.model.Language;
 import com.falcon.snap.model.TextBlockItem;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.mlkit.common.model.DownloadConditions;
-import com.google.mlkit.common.model.RemoteModelManager;
-import com.google.mlkit.nl.translate.TranslateRemoteModel;
-import com.google.mlkit.nl.translate.Translation;
-import com.google.mlkit.nl.translate.Translator;
-import com.google.mlkit.nl.translate.TranslatorOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Translates text blocks with ML Kit's on-device translator. The language models (about 30 MB
- * each) are downloaded the first time a language is used; after that it works offline.
+ * Offline translation of text blocks with NLLB-200 ({@link NllbTranslator}), using the model files
+ * found by {@link ModelStore}. The model (about 1 GB in memory) is loaded on first use and kept
+ * until {@link #release()}.
  */
 public final class TranslatorEngine {
     public interface Callback {
-        /** A language model has to be downloaded first; this can take a while. */
-        void onDownloadingModel();
+        /** The model has to be loaded from storage first; this takes several seconds. */
+        void onLoadingModel();
+
+        void onProgress(int done, int total);
 
         void onDone();
 
+        /** A {@link ModelsMissingException} means the NLLB files are not installed. */
         void onError(Exception e);
     }
+
+    private static final ExecutorService WORKER = Executors.newSingleThreadExecutor();
+    private static final Handler MAIN = new Handler(Looper.getMainLooper());
+    /** Guards the translator against being released while a translation is running. */
+    private static final ReentrantLock LOCK = new ReentrantLock();
+    private static NllbTranslator translator;
+    private static String loadedFingerprint;
 
     private TranslatorEngine() {
     }
@@ -34,16 +44,16 @@ public final class TranslatorEngine {
     /**
      * Fills in {@link TextBlockItem#translatedText}. With {@code all} false, blocks that already
      * have a translation (for example one the user typed) are left alone.
-     * Callbacks are delivered on the main thread.
+     * Must be called on the main thread; callbacks are delivered there too.
      */
-    public static void translate(List<TextBlockItem> blocks, Language source, Language target,
+    public static void translate(Context context, List<TextBlockItem> blocks, Language source, Language target,
                                  boolean all, Callback callback) {
         List<TextBlockItem> pending = new ArrayList<>();
         for (TextBlockItem block : blocks) {
             if (!all && block.translatedText != null) {
                 continue;
             }
-            if (!hasLetters(block.sourceText)) {
+            if (!hasLetters(block.sourceText) || source.nllbCode.equals(target.nllbCode)) {
                 // Prices, phone numbers, punctuation: nothing to translate, keep the original pixels.
                 block.translatedText = block.sourceText;
                 continue;
@@ -54,74 +64,117 @@ public final class TranslatorEngine {
             callback.onDone();
             return;
         }
-
-        // Same ML Kit language on both sides: Simplified <-> Traditional Chinese, or no-op.
-        if (source.mlKitCode.equals(target.mlKitCode)) {
-            for (TextBlockItem block : pending) {
-                block.translatedText = toTargetScript(toModelScript(block.sourceText, source), target);
-            }
-            callback.onDone();
-            return;
+        List<String> texts = new ArrayList<>();
+        for (TextBlockItem block : pending) {
+            texts.add(block.sourceText);
         }
 
-        RemoteModelManager models = RemoteModelManager.getInstance();
-        Task<Boolean> hasSource = models.isModelDownloaded(new TranslateRemoteModel.Builder(source.mlKitCode).build());
-        Task<Boolean> hasTarget = models.isModelDownloaded(new TranslateRemoteModel.Builder(target.mlKitCode).build());
-        Tasks.whenAllComplete(hasSource, hasTarget).addOnCompleteListener(ignored -> {
-            boolean ready = hasSource.isSuccessful() && Boolean.TRUE.equals(hasSource.getResult())
-                    && hasTarget.isSuccessful() && Boolean.TRUE.equals(hasTarget.getResult());
-            if (!ready) {
-                callback.onDownloadingModel();
+        Context appContext = context.getApplicationContext();
+        WORKER.execute(() -> {
+            LOCK.lock();
+            try {
+                NllbTranslator nllb = obtainTranslator(appContext, callback);
+                if (!nllb.supports(source.nllbCode) || !nllb.supports(target.nllbCode)) {
+                    throw new IllegalArgumentException("The installed NLLB tokenizer does not know "
+                            + source.nllbCode + " / " + target.nllbCode);
+                }
+                List<String> results = new ArrayList<>();
+                for (int i = 0; i < texts.size(); i++) {
+                    results.add(translateText(nllb, texts.get(i), source, target));
+                    int done = i + 1;
+                    MAIN.post(() -> callback.onProgress(done, texts.size()));
+                }
+                MAIN.post(() -> {
+                    // Blocks belong to the UI thread; only touch them here.
+                    for (int i = 0; i < pending.size(); i++) {
+                        pending.get(i).translatedText = results.get(i);
+                    }
+                    callback.onDone();
+                });
+            } catch (Exception | OutOfMemoryError e) {
+                Exception error = e instanceof Exception ? (Exception) e : new RuntimeException(e);
+                MAIN.post(() -> callback.onError(error));
+            } finally {
+                LOCK.unlock();
             }
-            runTranslation(pending, source, target, callback);
         });
     }
 
-    private static void runTranslation(List<TextBlockItem> pending, Language source, Language target,
-                                       Callback callback) {
-        Translator translator = Translation.getClient(new TranslatorOptions.Builder()
-                .setSourceLanguage(source.mlKitCode)
-                .setTargetLanguage(target.mlKitCode)
-                .build());
-        translator.downloadModelIfNeeded(new DownloadConditions.Builder().build())
-                .addOnSuccessListener(unused -> {
-                    List<Task<String>> tasks = new ArrayList<>();
-                    for (TextBlockItem block : pending) {
-                        tasks.add(translator.translate(toModelScript(block.sourceText, source)));
-                    }
-                    Tasks.whenAllComplete(tasks).addOnCompleteListener(done -> {
-                        int failed = 0;
-                        Exception lastError = null;
-                        for (int i = 0; i < tasks.size(); i++) {
-                            Task<String> task = tasks.get(i);
-                            if (task.isSuccessful()) {
-                                pending.get(i).translatedText = toTargetScript(task.getResult(), target);
-                            } else {
-                                failed++;
-                                lastError = task.getException();
-                            }
-                        }
-                        translator.close();
-                        if (failed == tasks.size()) {
-                            callback.onError(lastError != null ? lastError : new RuntimeException("Translation failed"));
-                        } else {
-                            callback.onDone();
-                        }
-                    });
-                })
-                .addOnFailureListener(e -> {
+    /**
+     * Frees the translation model if it is idle. Called when the app goes to the background so it
+     * does not sit on a gigabyte of memory; the next translation reloads it.
+     */
+    public static void release() {
+        if (LOCK.tryLock()) {
+            try {
+                if (translator != null) {
                     translator.close();
-                    callback.onError(e);
-                });
+                    translator = null;
+                    loadedFingerprint = null;
+                }
+            } finally {
+                LOCK.unlock();
+            }
+        }
     }
 
-    /** ML Kit's "zh" model is Simplified Chinese; Traditional input is converted before translating. */
-    private static String toModelScript(String text, Language source) {
-        return source.isTraditionalChinese() ? ChineseConverter.toSimplified(text) : text;
+    /** Caller holds LOCK. Reloads when the files on storage changed, e.g. after a retrained model was copied in. */
+    private static NllbTranslator obtainTranslator(Context context, Callback callback) throws Exception {
+        ModelStore.NllbFiles files = ModelStore.nllb(context);
+        if (files == null) {
+            throw new ModelsMissingException("nllb/ (encoder_model, decoder_model_merged, " + ModelStore.TOKENIZER + ")");
+        }
+        String fingerprint = Onnx.fingerprint(files.encoder) + Onnx.fingerprint(files.decoder)
+                + Onnx.fingerprint(files.tokenizer);
+        if (translator == null || !fingerprint.equals(loadedFingerprint)) {
+            MAIN.post(callback::onLoadingModel);
+            if (translator != null) {
+                translator.close();
+                translator = null;
+            }
+            translator = new NllbTranslator(files);
+            loadedFingerprint = fingerprint;
+        }
+        return translator;
     }
 
-    private static String toTargetScript(String text, Language target) {
-        return target.isTraditionalChinese() ? ChineseConverter.toTraditional(text) : text;
+    /** NLLB is a sentence-level model, so a paragraph is translated sentence by sentence. */
+    private static String translateText(NllbTranslator nllb, String text, Language source, Language target)
+            throws Exception {
+        StringBuilder out = new StringBuilder();
+        for (String sentence : splitSentences(text)) {
+            String translated = hasLetters(sentence)
+                    ? nllb.translate(sentence, source.nllbCode, target.nllbCode) : sentence;
+            if (out.length() > 0 && !target.joinsWithoutSpaces()) {
+                out.append(' ');
+            }
+            out.append(translated);
+        }
+        return out.toString();
+    }
+
+    private static List<String> splitSentences(String text) {
+        List<String> sentences = new ArrayList<>();
+        int start = 0;
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            boolean cjkStop = c == '。' || c == '！' || c == '？' || c == '；';
+            boolean latinStop = (c == '.' || c == '!' || c == '?')
+                    && (i + 1 == text.length() || Character.isWhitespace(text.charAt(i + 1)));
+            if (cjkStop || latinStop) {
+                addSentence(sentences, text.substring(start, i + 1));
+                start = i + 1;
+            }
+        }
+        addSentence(sentences, text.substring(start));
+        return sentences;
+    }
+
+    private static void addSentence(List<String> sentences, String sentence) {
+        String trimmed = sentence.trim();
+        if (!trimmed.isEmpty()) {
+            sentences.add(trimmed);
+        }
     }
 
     private static boolean hasLetters(String text) {

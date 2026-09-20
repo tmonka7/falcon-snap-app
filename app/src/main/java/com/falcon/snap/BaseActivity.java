@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -13,7 +12,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.falcon.snap.data.Prefs;
-import com.falcon.snap.model.Language;
 
 /**
  * Shared plumbing: the red top bar and the "source ⇄ target" language bar. A screen opts in by
@@ -82,13 +80,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (!canChangeLanguages()) {
             return;
         }
-        Language source = prefs.source();
-        Language target = prefs.target();
-        if (!target.canBeSource()) {
-            Toast.makeText(this, getString(R.string.source_not_supported, target.name), Toast.LENGTH_LONG).show();
-            return;
-        }
-        prefs.setLanguages(target, source);
+        prefs.setLanguages(prefs.target(), prefs.source());
         onLanguagesChanged();
     }
 

@@ -26,8 +26,7 @@ public final class Prefs {
     }
 
     public Language source() {
-        Language language = Language.byCode(prefs.getString(KEY_SOURCE, "en"));
-        return language.canBeSource() ? language : Language.byCode("en");
+        return Language.byCode(prefs.getString(KEY_SOURCE, "en"));
     }
 
     public Language target() {

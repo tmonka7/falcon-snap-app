@@ -15,21 +15,26 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.falcon.snap.engine.ModelStore;
 import com.falcon.snap.model.Language;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Picks the source or the target language. The choice is written to prefs before finishing with
- * RESULT_OK. Only languages the OCR engine can read are offered as a source.
+ * RESULT_OK. When picking a source, languages whose OCR model is not installed are marked.
  */
 public class LanguageSelectActivity extends BaseActivity {
     public static final String EXTRA_PICK_SOURCE = "pick_source";
 
     private boolean pickSource;
     private Language current;
+    /** Codes of the languages whose OCR model is installed. */
+    private final Set<String> readableCodes = new HashSet<>();
     private final LanguageAdapter adapter = new LanguageAdapter();
 
     @Override
@@ -40,6 +45,11 @@ public class LanguageSelectActivity extends BaseActivity {
 
         pickSource = getIntent().getBooleanExtra(EXTRA_PICK_SOURCE, true);
         current = pickSource ? prefs.source() : prefs.target();
+        for (Language language : Language.all()) {
+            if (ModelStore.canRead(this, language)) {
+                readableCodes.add(language.code);
+            }
+        }
         TextView subtitle = findViewById(R.id.top_subtitle);
         subtitle.setText(pickSource ? R.string.subtitle_translate_from : R.string.subtitle_translate_to);
         subtitle.setVisibility(View.VISIBLE);
@@ -66,21 +76,12 @@ public class LanguageSelectActivity extends BaseActivity {
         showLanguages("");
     }
 
-    private boolean isSelectable(Language language) {
-        return !pickSource || language.canBeSource();
-    }
-
     /** Rows are either a String (section header) or a Language. */
     private void showLanguages(String query) {
         String needle = query.trim().toLowerCase(Locale.ROOT);
         List<Object> rows = new ArrayList<>();
         if (needle.isEmpty()) {
-            List<Language> recents = new ArrayList<>();
-            for (Language language : prefs.recents()) {
-                if (isSelectable(language)) {
-                    recents.add(language);
-                }
-            }
+            List<Language> recents = prefs.recents();
             if (!recents.isEmpty()) {
                 rows.add(getString(R.string.recent_languages));
                 rows.addAll(recents);
@@ -91,7 +92,7 @@ public class LanguageSelectActivity extends BaseActivity {
             boolean matchesQuery = needle.isEmpty()
                     || language.name.toLowerCase(Locale.ROOT).contains(needle)
                     || language.shortName.toLowerCase(Locale.ROOT).contains(needle);
-            if (isSelectable(language) && matchesQuery) {
+            if (matchesQuery) {
                 matches.add(language);
             }
         }
@@ -113,7 +114,7 @@ public class LanguageSelectActivity extends BaseActivity {
             source = picked;
         } else {
             if (picked.code.equals(source.code)) {
-                source = target.canBeSource() ? target : Language.byCode("en".equals(picked.code) ? "zh" : "en");
+                source = target;
             }
             target = picked;
         }
@@ -165,7 +166,10 @@ public class LanguageSelectActivity extends BaseActivity {
             LanguageHolder h = (LanguageHolder) holder;
             boolean selected = language.code.equals(current.code);
             h.flag.setText(language.flag());
-            h.name.setText(language.name);
+            // A source language needs an installed OCR model; say so rather than hiding the language.
+            boolean readable = !pickSource || readableCodes.contains(language.code);
+            h.name.setText(readable ? language.name : language.name + "  ·  " + getString(R.string.ocr_model_missing));
+            h.name.setAlpha(readable ? 1f : 0.5f);
             h.radio.setChecked(selected);
             if (selected) {
                 h.itemView.setBackgroundResource(R.drawable.bg_row_selected);
