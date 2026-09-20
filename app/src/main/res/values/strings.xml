@@ -123,8 +123,8 @@
 
     <!-- Models -->
     <string name="title_models">Offline Models</string>
-    <string name="models_intro">OCR and translation run entirely on this device, using the model files in the folder below. Nothing is downloaded. Copy the files there from a computer, or import them from a folder on this device. To use a retrained model, replace its file.</string>
-    <string name="models_group_ocr" translatable="false">OCR · PaddleOCR PP-OCRv5</string>
+    <string name="models_intro">OCR and translation run entirely on this device. The OCR models are bundled in the app; the translation model is loaded from the folder below. Nothing is downloaded. Copy files into that folder from a computer, or import them from a folder on this device. A model placed there also replaces the bundled one, so a retrained model can be tried without reinstalling the app.</string>
+    <string name="models_group_ocr" translatable="false">OCR · PaddleOCR PP-OCRv6</string>
     <string name="models_group_nllb">Translation · NLLB-200</string>
     <string name="model_det">Text detection</string>
     <string name="model_rec_fmt">Recognition “%1$s”</string>
@@ -134,6 +134,7 @@
     <string name="model_tokenizer">Tokenizer</string>
     <string name="model_missing">Not installed</string>
     <string name="model_optional">Not installed (optional)</string>
+    <string name="model_bundled">bundled in app</string>
     <string name="import_models">Import from folder…</string>
     <string name="import_scanning">Looking for model files…</string>
     <string name="import_progress_fmt">Copying %1$s\n%2$s / %3$s</string>
@@ -160,5 +161,5 @@
     <string name="help_text">1. Choose the language of the text (left) and the language you want (right).\n\n2. Tap Capture and photograph the text, or pick an image from the gallery.\n\n3. The translated text is drawn over the original, in the same place. Use \"Show original\" to compare.\n\n4. Tap any text block on the image — or the Edit button — to correct the recognized text or the translation.\n\n5. Tap Save to keep the result in History.\n\nTips: fill the frame with the text, hold steady, and avoid glare. Everything runs offline with the models listed under Settings › Offline Models; the first translation after opening the app takes a few extra seconds while the model loads.</string>
     <string name="terms_text">SnapTranslate is provided \"as is\", without warranty of any kind. Translations are produced automatically by an on-device model and may be inaccurate; do not rely on them for medical, legal or safety-critical decisions.</string>
     <string name="privacy_text">Text recognition and translation run entirely on your device. The app has no internet permission: your photos, the recognized text and your history cannot leave the device.</string>
-    <string name="licenses_text" translatable="false">AndroidX, CameraX and Material Components for Android — Apache License 2.0\n\nONNX Runtime — MIT License\n\nPaddleOCR PP-OCRv5 models — Apache License 2.0\n\nNLLB-200 model (Meta AI) — CC-BY-NC 4.0, non-commercial use only\n\nMaterial Icons — Apache License 2.0</string>
+    <string name="licenses_text" translatable="false">AndroidX, CameraX and Material Components for Android — Apache License 2.0\n\nONNX Runtime — MIT License\n\nPaddleOCR PP-OCR models — Apache License 2.0\n\nNLLB-200 model (Meta AI) — CC-BY-NC 4.0, non-commercial use only\n\nMaterial Icons — Apache License 2.0</string>
 </resources>

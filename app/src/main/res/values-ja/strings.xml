@@ -121,7 +121,7 @@
 
     <!-- Models -->
     <string name="title_models">オフラインモデル</string>
-    <string name="models_intro">文字認識と翻訳は、下のフォルダにあるモデルファイルを使って、すべてこの端末上で実行されます。ダウンロードは一切行いません。パソコンからこのフォルダにファイルをコピーするか、端末内のフォルダからインポートしてください。再学習したモデルを使うには、該当するファイルを置き換えるだけです。</string>
+    <string name="models_intro">文字認識と翻訳はすべてこの端末上で実行されます。OCR モデルはアプリに内蔵されており、翻訳モデルは下のフォルダから読み込まれます。ダウンロードは一切行いません。パソコンからこのフォルダにファイルをコピーするか、端末内のフォルダからインポートしてください。このフォルダに置いたモデルは内蔵モデルより優先されるため、再学習したモデルをアプリの再インストールなしで試せます。</string>
     <string name="models_group_nllb">翻訳 · NLLB-200</string>
     <string name="model_det">文字検出</string>
     <string name="model_rec_fmt">文字認識「%1$s」</string>
@@ -131,6 +131,7 @@
     <string name="model_tokenizer">トークナイザー</string>
     <string name="model_missing">未インストール</string>
     <string name="model_optional">未インストール（任意）</string>
+    <string name="model_bundled">アプリに内蔵</string>
     <string name="import_models">フォルダからインポート…</string>
     <string name="import_scanning">モデルファイルを探しています…</string>
     <string name="import_progress_fmt">%1$s をコピー中\n%2$s / %3$s</string>

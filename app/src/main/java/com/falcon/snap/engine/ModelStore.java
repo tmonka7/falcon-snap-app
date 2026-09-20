@@ -5,17 +5,23 @@ import android.content.Context;
 import com.falcon.snap.model.Language;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
- * Locates the model files on storage. Nothing is bundled in the APK and nothing is downloaded:
- * the app runs whatever models it finds here, so a retrained model is deployed by replacing a file.
+ * Locates the models. Nothing is ever downloaded.
  *
- * Layout, under any of the {@link #roots} (see MODELS.md):
+ * OCR models (small) are bundled in the APK: app/src/main/assets/PP-OCRv6_small_det.onnx,
+ * PP-OCRv6_small_rec.onnx and the recognizer's dictionary PP-OCRv6_small_rec.txt. A model on storage
+ * takes priority over the bundled one, so a retrained model can be tried without rebuilding the app.
+ * NLLB (about 1 GB) is always loaded from storage.
+ *
+ * Storage layout, under any of the {@link #roots} (see MODELS.md):
  * <pre>
- *   models/ocr/det.onnx                        PP-OCRv5 text detection
- *   models/ocr/rec_KEY.onnx + rec_KEY.txt      PP-OCRv5 text recognition + its character dictionary
+ *   models/ocr/det.onnx                        text detection (overrides the bundled one)
+ *   models/ocr/rec_KEY.onnx + rec_KEY.txt      text recognition + its character dictionary
  *   models/nllb/encoder_model*.onnx            NLLB-200 encoder
  *   models/nllb/decoder_model_merged*.onnx     NLLB-200 decoder (or decoder_model + decoder_with_past_model)
  *   models/nllb/tokenizer.json
@@ -27,8 +33,14 @@ public final class ModelStore {
     public static final String OCR_DET = "det.onnx";
     public static final String TOKENIZER = "tokenizer.json";
 
+    /** Bundled OCR models keep PaddleOCR's file names, e.g. PP-OCRv6_small_det.onnx / PP-OCRv6_small_rec.onnx. */
+    private static final String ASSET_DET_SUFFIX = "_det.onnx";
+    private static final String ASSET_REC_SUFFIX = "_rec.onnx";
+
     /** Weight formats with float32 inputs/outputs, smallest and fastest first. fp16 I/O is not supported. */
     private static final String[] VARIANT_PREFERENCE = {"_quantized", "_int8", "_uint8", "_q4", "_bnb4", ""};
+
+    private static String[] assetNames;
 
     private ModelStore() {
     }
@@ -71,17 +83,84 @@ public final class ModelStore {
         return root;
     }
 
-    public static File detector(Context context) {
-        return find(context, DIR_OCR, OCR_DET);
+    public static ModelSource detector(Context context) {
+        File onStorage = find(context, DIR_OCR, OCR_DET);
+        if (onStorage != null) {
+            return ModelSource.of(onStorage);
+        }
+        for (String asset : assetNames(context)) {
+            String name = asset.toLowerCase(Locale.ROOT);
+            if (name.equals(OCR_DET) || name.endsWith(ASSET_DET_SUFFIX)) {
+                return ModelSource.asset(asset);
+            }
+        }
+        return null;
     }
 
-    public static File recognizer(Context context, String key) {
-        return find(context, DIR_OCR, "rec_" + key + ".onnx");
+    public static ModelSource recognizer(Context context, String key) {
+        File onStorage = find(context, DIR_OCR, "rec_" + key + ".onnx");
+        return onStorage != null ? ModelSource.of(onStorage) : bundledRecognizer(context, key);
     }
 
-    /** May be null even when the recognizer exists: some ONNX exports embed the dictionary instead. */
-    public static File dictionary(Context context, String key) {
-        return find(context, DIR_OCR, "rec_" + key + ".txt");
+    /**
+     * The character dictionary that belongs to {@link #recognizer}: the .txt next to it, on storage
+     * or in the assets. May be null even when the recognizer exists, since some ONNX exports embed
+     * the dictionary instead.
+     */
+    public static ModelSource dictionary(Context context, String key) {
+        ModelSource recognizer = recognizer(context, key);
+        if (recognizer == null) {
+            return null;
+        }
+        if (!recognizer.isBundled()) {
+            return ModelSource.of(find(context, DIR_OCR, "rec_" + key + ".txt"));
+        }
+        String wanted = recognizer.name().substring(0, recognizer.name().length() - ".onnx".length()) + ".txt";
+        for (String asset : assetNames(context)) {
+            if (asset.equalsIgnoreCase(wanted)) {
+                return ModelSource.asset(asset);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * A recognizer shipped in the APK's assets folder. Accepts the app's own naming (rec_KEY.onnx)
+     * and PaddleOCR's: "PP-OCRv6_small_rec.onnx" is the main recognizer, while a script-specific
+     * one carries its key as a prefix, as in "eslav_PP-OCRv5_mobile_rec.onnx".
+     */
+    private static ModelSource bundledRecognizer(Context context, String key) {
+        for (String asset : assetNames(context)) {
+            String name = asset.toLowerCase(Locale.ROOT);
+            boolean match = name.equals("rec_" + key + ".onnx")
+                    || (name.endsWith(ASSET_REC_SUFFIX) && key.equals(keyOfPaddleName(name)));
+            if (match) {
+                return ModelSource.asset(asset);
+            }
+        }
+        return null;
+    }
+
+    private static String keyOfPaddleName(String lowerCaseName) {
+        for (String key : Language.allOcrKeys()) {
+            if (lowerCaseName.startsWith(key + "_")) {
+                return key;
+            }
+        }
+        return Language.OCR_MAIN;
+    }
+
+    /** Files in the root of the APK's assets folder. Listing assets is slow, and they cannot change, so cache it. */
+    private static synchronized String[] assetNames(Context context) {
+        if (assetNames == null) {
+            try {
+                String[] names = context.getAssets().list("");
+                assetNames = names == null ? new String[0] : names;
+            } catch (IOException e) {
+                assetNames = new String[0];
+            }
+        }
+        return assetNames;
     }
 
     /** The installed recognizer to use for this language, or null when none of its options is installed. */
@@ -161,7 +240,7 @@ public final class ModelStore {
      * file. Lets the importer accept both a "models/ocr + models/nllb" tree and a flat folder.
      */
     public static String folderFor(String fileName) {
-        String name = fileName.toLowerCase(java.util.Locale.ROOT);
+        String name = fileName.toLowerCase(Locale.ROOT);
         if (name.equals(OCR_DET) || name.startsWith("rec_")) {
             return DIR_OCR;
         }

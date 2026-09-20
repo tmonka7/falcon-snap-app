@@ -1,13 +1,12 @@
 package com.falcon.snap.engine;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.FloatBuffer;
@@ -23,9 +22,9 @@ import ai.onnxruntime.OrtSession;
 import ai.onnxruntime.TensorInfo;
 
 /**
- * PaddleOCR PP-OCRv5 on ONNX Runtime: text detection, then recognition of each detected line.
- * Pre- and post-processing follow the models' inference.yml, so any PP-OCRv5 det/rec model
- * (including a retrained one) exported to ONNX works unchanged.
+ * PaddleOCR (PP-OCRv6, and PP-OCRv5: same input format) on ONNX Runtime: text detection, then
+ * recognition of each detected line. Pre- and post-processing follow the models' inference.yml, so
+ * a retrained det/rec model exported to ONNX works unchanged.
  *
  * Not thread-safe; {@link OcrEngine} calls it from a single worker thread.
  */
@@ -57,8 +56,10 @@ final class PaddleOcr {
     /** CTC classes: index 0 is the blank, then the dictionary, then (usually) the space. */
     private List<String> classes;
 
-    List<Line> run(Bitmap bitmap, File detFile, File recFile, File dictFile) throws OrtException, IOException {
-        load(detFile, recFile, dictFile);
+    /** @param dictionary may be null when the recognizer carries its character list in its ONNX metadata */
+    List<Line> run(Context context, Bitmap bitmap, ModelSource detectorModel, ModelSource recognizerModel,
+                   ModelSource dictionary) throws OrtException, IOException {
+        load(context, detectorModel, recognizerModel, dictionary);
         List<Line> lines = new ArrayList<>();
         for (float[] quad : detect(bitmap)) {
             Line line = recognize(bitmap, quad);
@@ -78,17 +79,23 @@ final class PaddleOcr {
         recognizerFingerprint = null;
     }
 
-    private void load(File detFile, File recFile, File dictFile) throws OrtException, IOException {
-        if (!Onnx.fingerprint(detFile).equals(detectorFingerprint)) {
+    private void load(Context context, ModelSource detectorModel, ModelSource recognizerModel,
+                      ModelSource dictionary) throws OrtException, IOException {
+        if (!detectorModel.fingerprint().equals(detectorFingerprint)) {
+            // Forget the old session first, so a failed load cannot leave a closed one marked as current.
             close(detector);
-            detector = Onnx.open(detFile);
-            detectorFingerprint = Onnx.fingerprint(detFile);
+            detector = null;
+            detectorFingerprint = null;
+            detector = detectorModel.openSession(context);
+            detectorFingerprint = detectorModel.fingerprint();
         }
-        String wanted = Onnx.fingerprint(recFile) + (dictFile == null ? "" : Onnx.fingerprint(dictFile));
+        String wanted = recognizerModel.fingerprint() + (dictionary == null ? "" : dictionary.fingerprint());
         if (!wanted.equals(recognizerFingerprint)) {
             close(recognizer);
-            recognizer = Onnx.open(recFile);
-            classes = loadClasses(recognizer, dictFile);
+            recognizer = null;
+            recognizerFingerprint = null;
+            recognizer = recognizerModel.openSession(context);
+            classes = loadClasses(context, recognizer, dictionary);
             recognizerFingerprint = wanted;
         }
     }
@@ -103,15 +110,20 @@ final class PaddleOcr {
         }
     }
 
-    private static List<String> loadClasses(OrtSession session, File dictFile) throws OrtException, IOException {
+    private static List<String> loadClasses(Context context, OrtSession session, ModelSource dictionary)
+            throws OrtException, IOException {
         List<String> classes = new ArrayList<>();
         classes.add("");
-        if (dictFile != null) {
+        if (dictionary != null) {
             try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(dictFile), StandardCharsets.UTF_8))) {
+                    new InputStreamReader(dictionary.open(context), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // Do not trim: some entries are whitespace characters (the first is U+3000).
+                    if (classes.size() == 1 && !line.isEmpty() && line.charAt(0) == 0xFEFF) {
+                        // A byte-order mark added by a Windows editor would otherwise become part of the first character.
+                        line = line.substring(1);
+                    }
+                    // Do not trim: some dictionaries contain whitespace characters (PP-OCRv5's first entry is U+3000).
                     if (!line.isEmpty()) {
                         classes.add(line);
                     }
@@ -121,7 +133,7 @@ final class PaddleOcr {
             Map<String, String> metadata = session.getMetadata().getCustomMetadata();
             String embedded = metadata.get(METADATA_DICTIONARY);
             if (embedded == null) {
-                throw new IOException("No character dictionary: add rec_KEY.txt next to the recognition model");
+                throw new IOException("No character dictionary: put a .txt with the same name next to the recognition model");
             }
             Collections.addAll(classes, embedded.split("\n"));
         }
@@ -161,9 +173,29 @@ final class PaddleOcr {
             int mapW = (int) shape[shape.length - 1];
             float[] prob = new float[mapW * mapH];
             output.getFloatBuffer().get(prob);
+            sigmoidIfLogits(prob);
             return DbPostProcessor.boxes(prob, mapW, mapH,
                     bitmap.getWidth() / (float) mapW, bitmap.getHeight() / (float) mapH,
                     bitmap.getWidth(), bitmap.getHeight());
+        }
+    }
+
+    /**
+     * Paddle's own export ends in a sigmoid, so the map holds probabilities. Exports made another way
+     * (for example from a safetensors checkpoint) may stop at the logits; values outside 0..1 give that away.
+     */
+    private static void sigmoidIfLogits(float[] map) {
+        boolean logits = false;
+        for (float value : map) {
+            if (value < 0f || value > 1f) {
+                logits = true;
+                break;
+            }
+        }
+        if (logits) {
+            for (int i = 0; i < map.length; i++) {
+                map[i] = (float) (1.0 / (1.0 + Math.exp(-map[i])));
+            }
         }
     }
 
@@ -215,6 +247,7 @@ final class PaddleOcr {
             int classCount = (int) shape[shape.length - 1];
             float[] scores = new float[steps * classCount];
             output.getFloatBuffer().get(scores);
+            checkDictionaryFits(classCount);
 
             Line line = decodeCtc(scores, steps, classCount);
             if (line == null) {
@@ -225,8 +258,28 @@ final class PaddleOcr {
         }
     }
 
+    /**
+     * The model's class count must be blank + dictionary (+ space). A dictionary from another model
+     * generation (PP-OCRv5 has 18383 characters, PP-OCRv6 18708) would silently decode to the wrong
+     * characters, so refuse it with a message that says what is wrong.
+     */
+    private void checkDictionaryFits(int classCount) {
+        int dictionarySize = classes.size() - 1;
+        if (classCount != dictionarySize + 1 && classCount != dictionarySize + 2) {
+            throw new IllegalStateException("The recognition model has " + classCount + " classes but its dictionary has "
+                    + dictionarySize + " characters (expected " + (classCount - 2) + "). Use the dictionary that belongs to this model.");
+        }
+    }
+
     /** Greedy CTC: best class per step, collapse repeats, drop blanks. */
     private Line decodeCtc(float[] scores, int steps, int classCount) {
+        // Paddle's export ends in a softmax; other exports may return logits. Rows of probabilities sum to 1.
+        float firstRowSum = 0f;
+        for (int c = 0; c < classCount; c++) {
+            firstRowSum += scores[c];
+        }
+        boolean probabilities = Math.abs(firstRowSum - 1f) < 0.02f;
+
         StringBuilder text = new StringBuilder();
         float confidenceSum = 0f;
         int characters = 0;
@@ -243,7 +296,7 @@ final class PaddleOcr {
             }
             if (best != 0 && best != previous) {
                 text.append(classAt(best, classCount));
-                confidenceSum += bestScore;
+                confidenceSum += probabilities ? bestScore : softmaxOfBest(scores, t * classCount, classCount, bestScore);
                 characters++;
             }
             previous = best;
@@ -256,6 +309,15 @@ final class PaddleOcr {
         line.text = result;
         line.confidence = confidenceSum / characters;
         return line;
+    }
+
+    /** Softmax probability of the largest logit in one row: 1 / sum(exp(x - max)). */
+    private static float softmaxOfBest(float[] scores, int offset, int classCount, float best) {
+        double sum = 0;
+        for (int c = 0; c < classCount; c++) {
+            sum += Math.exp(scores[offset + c] - best);
+        }
+        return (float) (1.0 / sum);
     }
 
     private String classAt(int index, int classCount) {

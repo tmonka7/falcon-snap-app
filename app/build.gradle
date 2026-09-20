@@ -27,6 +27,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    androidResources {
+        // The bundled OCR models (src/main/assets/*.onnx) are already dense binary data: zipping them
+        // only slows down loading, and leaving them stored lets the app read their size.
+        noCompress 'onnx'
+    }
 }
 
 dependencies {

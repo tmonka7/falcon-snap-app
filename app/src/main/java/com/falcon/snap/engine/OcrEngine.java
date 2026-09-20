@@ -9,7 +9,6 @@ import android.os.Looper;
 import com.falcon.snap.model.Language;
 import com.falcon.snap.model.TextBlockItem;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,8 +16,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Offline OCR. Runs PaddleOCR PP-OCRv5 ({@link PaddleOcr}) with the models found by
- * {@link ModelStore}, groups the lines into paragraphs ({@link LineGrouper}) and samples the
+ * Offline OCR. Runs PaddleOCR ({@link PaddleOcr}) with the models found by {@link ModelStore} -
+ * bundled in the APK's assets, or on storage - groups the lines into paragraphs
+ * ({@link LineGrouper}) and samples the
  * background / text colors needed to paint a translation over each block.
  */
 public final class OcrEngine {
@@ -42,14 +42,15 @@ public final class OcrEngine {
         Context appContext = context.getApplicationContext();
         WORKER.execute(() -> {
             try {
-                File detector = ModelStore.detector(appContext);
+                ModelSource detector = ModelStore.detector(appContext);
                 String key = ModelStore.recognizerKeyFor(appContext, source);
                 if (detector == null || key == null) {
                     throw new ModelsMissingException(detector == null
-                            ? "ocr/" + ModelStore.OCR_DET
-                            : "ocr/rec_" + source.ocrKeys[0] + ".onnx");
+                            ? "OCR detection model (assets/*_det.onnx or models/ocr/" + ModelStore.OCR_DET + ")"
+                            : "OCR recognition model \"" + source.ocrKeys[0] + "\" for " + source.shortName
+                            + " (models/ocr/rec_" + source.ocrKeys[0] + ".onnx)");
                 }
-                List<PaddleOcr.Line> lines = OCR.run(bitmap, detector,
+                List<PaddleOcr.Line> lines = OCR.run(appContext, bitmap, detector,
                         ModelStore.recognizer(appContext, key), ModelStore.dictionary(appContext, key));
                 List<TextBlockItem> blocks = LineGrouper.group(lines, source);
                 for (TextBlockItem block : blocks) {

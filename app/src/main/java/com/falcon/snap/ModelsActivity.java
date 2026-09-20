@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.documentfile.provider.DocumentFile;
 
+import com.falcon.snap.engine.ModelSource;
 import com.falcon.snap.engine.ModelStore;
 import com.falcon.snap.engine.OcrEngine;
 import com.falcon.snap.engine.TranslatorEngine;
@@ -89,12 +90,12 @@ public class ModelsActivity extends BaseActivity {
 
         ModelStore.NllbFiles nllb = ModelStore.nllbStatus(this);
         ViewGroup translation = addGroup(R.string.models_group_nllb);
-        addRow(translation, getString(R.string.model_encoder), nllb.encoder, false);
-        addRow(translation, getString(R.string.model_decoder), nllb.decoder, false);
+        addRow(translation, getString(R.string.model_encoder), ModelSource.of(nllb.encoder), false);
+        addRow(translation, getString(R.string.model_decoder), ModelSource.of(nllb.decoder), false);
         if (nllb.decoderWithPast != null) {
-            addRow(translation, getString(R.string.model_decoder_with_past), nllb.decoderWithPast, false);
+            addRow(translation, getString(R.string.model_decoder_with_past), ModelSource.of(nllb.decoderWithPast), false);
         }
-        addRow(translation, getString(R.string.model_tokenizer), nllb.tokenizer, false);
+        addRow(translation, getString(R.string.model_tokenizer), ModelSource.of(nllb.tokenizer), false);
     }
 
     private ViewGroup addGroup(int titleRes) {
@@ -104,14 +105,17 @@ public class ModelsActivity extends BaseActivity {
         return SettingRows.addGroup(this, container);
     }
 
-    private void addRow(ViewGroup group, String title, @Nullable File file, boolean optional) {
+    private void addRow(ViewGroup group, String title, @Nullable ModelSource model, boolean optional) {
         SettingRows.addDividerIfNeeded(this, group);
         View row = getLayoutInflater().inflate(R.layout.item_model_row, group, false);
         ((TextView) row.findViewById(R.id.model_title)).setText(title);
         TextView detail = row.findViewById(R.id.model_detail);
         ImageView icon = row.findViewById(R.id.model_icon);
-        if (file != null) {
-            detail.setText(file.getName() + "  ·  " + Formatter.formatShortFileSize(this, file.length()));
+        if (model != null) {
+            long size = model.size(this);
+            String text = model.name() + (size < 0 ? "" : "  ·  " + Formatter.formatShortFileSize(this, size));
+            // Bundled = shipped inside the APK (assets); otherwise it is a file in the models folder.
+            detail.setText(model.isBundled() ? text + "  ·  " + getString(R.string.model_bundled) : text);
             icon.setImageResource(R.drawable.ic_check_circle);
             ImageViewCompat.setImageTintList(icon, ContextCompat.getColorStateList(this, R.color.status_ok));
         } else {

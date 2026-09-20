@@ -19,8 +19,11 @@ Typical use:
 
 Requirements (install them into the SAME Python that runs this script: "python -m pip ..."):
     python -m pip install huggingface_hub pyyaml
-    OCR conversion:  python -m pip install paddlepaddle paddlex
+    OCR conversion:  python -m pip install paddlepaddle==3.1.1 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+                     python -m pip install paddlex
                      python -m paddlex --install paddle2onnx
+                     (PaddlePaddle 3.1.1 on purpose: paddle2onnx does not load under 3.2.x. Best kept in its own
+                     conda environment, separate from the one you train in.)
     NLLB export:     python -m pip install "optimum[onnxruntime]" onnxruntime   (not needed for --nllb prebuilt)
 The script checks for these up front and tells you what is missing.
 """
@@ -77,15 +80,63 @@ def require(modules, purpose, install_steps):
     sys.exit("\n".join(lines) + "\n")
 
 
+# paddle2onnx is a compiled extension linked against PaddlePaddle's own libraries, so the two have to
+# match. paddle2onnx 2.0.2rc3 (what "paddlex --install paddle2onnx" installs) loads under PaddlePaddle
+# 3.1.x but not under 3.2.x, where importing it fails with "DLL load failed ... procedure could not be
+# found" (PaddlePaddle/Paddle2ONNX#1607, PaddlePaddle/PaddleOCR#17083).
+PADDLE_FOR_CONVERSION = "3.1.1"
+PADDLE_INSTALL_STEPS = [
+    f"-m pip install paddlepaddle=={PADDLE_FOR_CONVERSION} -i https://www.paddlepaddle.org.cn/packages/stable/cpu/",
+    "-m pip install paddlex",
+    "-m paddlex --install paddle2onnx",
+]
+
+
+def installed_version(*distributions):
+    from importlib import metadata
+
+    for name in distributions:
+        try:
+            return f"{name} {metadata.version(name)}"
+        except metadata.PackageNotFoundError:
+            pass
+    return "not installed"
+
+
+def check_paddle2onnx_loads():
+    """find_spec only proves the files exist; the native part can still fail to load. Try it for real."""
+    probe = subprocess.run([sys.executable, "-c", "import paddle2onnx"], capture_output=True, text=True)
+    if probe.returncode == 0:
+        return
+    reason = (probe.stderr.strip().splitlines() or ["unknown error"])[-1]
+    python = f'"{sys.executable}"'
+    sys.exit("\n".join([
+        "\npaddle2onnx is installed but cannot be loaded:",
+        f"    {reason}",
+        f"Installed: {installed_version('paddlepaddle', 'paddlepaddle-gpu')}, {installed_version('paddle2onnx')}",
+        "",
+        "paddle2onnx is compiled against one PaddlePaddle version. The combination known to work is",
+        f"PaddlePaddle {PADDLE_FOR_CONVERSION} + the paddle2onnx that PaddleX installs. Conversion runs on the CPU and",
+        "only needs to happen once per model, so the cleanest fix is a small separate environment:",
+        "",
+        "    conda create -n paddle2onnx python=3.10 -y",
+        "    conda activate paddle2onnx",
+        "    python -m pip install huggingface_hub pyyaml",
+        *[f"    python {step}" for step in PADDLE_INSTALL_STEPS],
+        "",
+        "or, to change this environment in place:",
+        "",
+        f"    {python} -m pip uninstall -y paddlepaddle paddlepaddle-gpu",
+        *[f"    {python} {step}" for step in PADDLE_INSTALL_STEPS],
+        "",
+        "(On Windows this error can also mean the Microsoft Visual C++ Redistributable is missing or old.)\n",
+    ]))
+
+
 def check_requirements(args):
     if args.ocr or args.ocr_rec:
-        require(["paddle", "paddlex", "paddle2onnx"], "OCR conversion (Paddle -> ONNX)", [
-            "-m pip install paddlepaddle paddlex",
-            "-m paddlex --install paddle2onnx",
-            "",
-            "# Windows: if the conversion itself then fails, PaddleX's docs say to use the nightly CPU build:",
-            "-m pip install --pre paddlepaddle -i https://www.paddlepaddle.org.cn/packages/nightly/cpu/",
-        ])
+        require(["paddle", "paddlex", "paddle2onnx"], "OCR conversion (Paddle -> ONNX)", PADDLE_INSTALL_STEPS)
+        check_paddle2onnx_loads()
     if args.nllb and args.nllb != "prebuilt":
         require(["optimum", "onnxruntime"], "NLLB export", ['-m pip install "optimum[onnxruntime]" onnxruntime'])
 

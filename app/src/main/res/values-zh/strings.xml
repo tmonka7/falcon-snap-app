@@ -121,7 +121,7 @@
 
     <!-- Models -->
     <string name="title_models">离线模型</string>
-    <string name="models_intro">文字识别和翻译完全在本机运行，使用下方文件夹中的模型文件，不会下载任何内容。请从电脑把文件复制到该文件夹，或从本机的某个文件夹导入。要使用重新训练的模型，只需替换对应的文件。</string>
+    <string name="models_intro">文字识别和翻译完全在本机运行。OCR 模型已内置在应用中；翻译模型从下方文件夹加载，不会下载任何内容。请从电脑把文件复制到该文件夹，或从本机的某个文件夹导入。放在该文件夹中的模型会替代内置模型，因此无需重新安装应用即可试用重新训练的模型。</string>
     <string name="models_group_nllb">翻译 · NLLB-200</string>
     <string name="model_det">文字检测</string>
     <string name="model_rec_fmt">文字识别“%1$s”</string>
@@ -131,6 +131,7 @@
     <string name="model_tokenizer">分词器</string>
     <string name="model_missing">未安装</string>
     <string name="model_optional">未安装（可选）</string>
+    <string name="model_bundled">应用内置</string>
     <string name="import_models">从文件夹导入…</string>
     <string name="import_scanning">正在查找模型文件…</string>
     <string name="import_progress_fmt">正在复制 %1$s\n%2$s / %3$s</string>

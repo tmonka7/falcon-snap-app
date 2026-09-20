@@ -17,11 +17,23 @@ final class Onnx {
 
     /** Loads a model straight from its file, so large models are never copied through the Java heap. */
     static OrtSession open(File model) throws OrtException {
-        try (OrtSession.SessionOptions options = new OrtSession.SessionOptions()) {
-            // Big cores only: more threads than that makes int8 matmuls slower, not faster.
-            options.setIntraOpNumThreads(Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors() / 2)));
+        try (OrtSession.SessionOptions options = options()) {
             return env().createSession(model.getAbsolutePath(), options);
         }
+    }
+
+    /** Loads a model that is only available as bytes (an APK asset). */
+    static OrtSession open(byte[] model) throws OrtException {
+        try (OrtSession.SessionOptions options = options()) {
+            return env().createSession(model, options);
+        }
+    }
+
+    private static OrtSession.SessionOptions options() throws OrtException {
+        OrtSession.SessionOptions options = new OrtSession.SessionOptions();
+        // Big cores only: more threads than that makes int8 matmuls slower, not faster.
+        options.setIntraOpNumThreads(Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors() / 2)));
+        return options;
     }
 
     /** Identifies one version of a model file, so a replaced (retrained) file is reloaded. */

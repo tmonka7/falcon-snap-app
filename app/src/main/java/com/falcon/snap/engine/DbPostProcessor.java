@@ -5,16 +5,20 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Turns the PP-OCRv5 detector's probability map into text-line boxes. This is PaddleOCR's
- * DBPostProcess (threshold, connected regions, minimum-area box, score filter, "unclip" growth)
- * written without OpenCV. The constants are the ones in the model's inference.yml.
+ * Turns the detector's probability map into text-line boxes. This is PaddleOCR's DBPostProcess
+ * (threshold, connected regions, minimum-area box, score filter, "unclip" growth) written without
+ * OpenCV.
+ *
+ * The constants are the PostProcess section of PP-OCRv6_small_det's inference.yml. PP-OCRv5 used
+ * thresh 0.3, box_thresh 0.6, unclip_ratio 1.5 and 1000 candidates: change them here if you go
+ * back to a v5 detector.
  */
 final class DbPostProcessor {
-    private static final float THRESH = 0.3f;
-    private static final float BOX_THRESH = 0.6f;
-    private static final float UNCLIP_RATIO = 1.5f;
+    private static final float THRESH = 0.2f;
+    private static final float BOX_THRESH = 0.45f;
+    private static final float UNCLIP_RATIO = 1.4f;
     private static final float MIN_SIZE = 3f;
-    private static final int MAX_CANDIDATES = 1000;
+    private static final int MAX_CANDIDATES = 3000;
     /** PaddleOCR treats a crop at least this many times taller than wide as vertical text. */
     private static final float VERTICAL_RATIO = 1.5f;
 
